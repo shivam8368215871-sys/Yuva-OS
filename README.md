@@ -6,6 +6,20 @@
 
 ## Features
 
+## Screenshots
+
+### Desktop
+![Yuva OS Hive desktop](screenshots/desktop.png)
+
+### File Manager and Terminal
+![File Manager and Terminal](screenshots/file-manager-terminal.png)
+
+### JupyterLab
+![JupyterLab integration](screenshots/jupyterlab.png)
+
+### Application Launcher
+![Yuva OS Hive application launcher](screenshots/app-launcher.png)
+
 ### Desktop interface
 - Desktop-style application windows and window management
 - Application dock and searchable app launcher
