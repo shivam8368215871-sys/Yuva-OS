@@ -1,0 +1,147 @@
+/* glass.css: macOS-style glass layer, loaded after theme.css.
+   Undo: delete this file and its <link> in index.html. */
+
+html:root, html.mat-classic:root, html.mat-glass:root, html.mat-liquid:root {
+  --accent: #0a84ff;
+  --surface: rgba(34,34,42,.5) !important;
+  --bar-bg: rgba(255,255,255,.06) !important;
+  --border: rgba(255,255,255,.16) !important;
+  --bf: blur(36px) saturate(180%) !important;
+}
+
+/* wallpaper fallback: glass needs color behind it. A wallpaper set inline on body still wins. */
+html {
+  background:
+    radial-gradient(1100px 700px at 12% 10%, #ff9fb8 0, transparent 60%),
+    radial-gradient(1000px 700px at 90% 15%, #6fb4ff 0, transparent 60%),
+    radial-gradient(1200px 800px at 50% 110%, #9b7bff 0, transparent 60%),
+    #5b6bd6;
+}
+body:not([style*="background"]) { background: transparent !important; }
+body::before { display: none !important; }
+body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, system-ui, sans-serif !important; color: #f2f2f7; }
+::selection { background: rgba(10,132,255,.35); }
+
+/* glass on every surface */
+#island, #taskbar, #quick-panel, #app-launcher, .widget, #ctx-menu, .win {
+  background: rgba(34,34,42,.5) !important;
+  -webkit-backdrop-filter: blur(36px) saturate(180%) !important;
+  backdrop-filter: blur(36px) saturate(180%) !important;
+  border: .5px solid rgba(255,255,255,.18) !important;
+  box-shadow: 0 22px 55px rgba(0,0,0,.38), inset 0 .5px 0 rgba(255,255,255,.25) !important;
+}
+#island { border-radius: 999px !important; }
+#island .isl-btn:hover { background: rgba(255,255,255,.14) !important; }
+#island .isl-app, #island .isl-date { color: #f2f2f7 !important; }
+#quick-panel { border-radius: 24px !important; }
+.widget { border-radius: 22px !important; }
+
+/* windows */
+.win { border-radius: 12px !important; }
+.win:not(.inactive) {
+  border-color: rgba(255,255,255,.22) !important;
+  box-shadow: 0 28px 70px rgba(0,0,0,.5), 0 0 0 .5px rgba(0,0,0,.6), inset 0 .5px 0 rgba(255,255,255,.28) !important;
+}
+.win.inactive { box-shadow: 0 10px 30px rgba(0,0,0,.3) !important; }
+.win .bar {
+  position: relative;
+  background: linear-gradient(rgba(255,255,255,.12), rgba(255,255,255,0)) !important;
+  -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
+  border-bottom: .5px solid rgba(255,255,255,.1) !important;
+  box-shadow: none !important;
+}
+.win:not(.inactive) .bar { box-shadow: none !important; }
+.win .body { background: transparent !important; }
+
+/* centered title */
+.window-head { position: absolute !important; left: 50%; top: 50%; transform: translate(-50%,-50%); pointer-events: none; }
+.window-title { font-weight: 600; font-size: 13px; color: #f2f2f7; opacity: .9; }
+
+/* traffic lights on the left */
+.window-controls { order: -1; display: flex; gap: 8px; z-index: 2; margin-right: 8px; }
+.window-controls button {
+  width: 12px !important; height: 12px !important; min-width: 12px !important; padding: 0 !important;
+  border-radius: 50% !important; font-size: 0 !important; color: transparent !important;
+  border: .5px solid rgba(0,0,0,.25) !important;
+}
+.window-controls button:nth-child(1), .window-controls button:nth-child(1):hover { background: #febc2e !important; }
+.window-controls button:nth-child(2), .window-controls button:nth-child(2):hover { background: #28c840 !important; }
+.window-controls button.window-close, .window-controls button.window-close:hover { background: #ff5f57 !important; order: -1; }
+.window-controls button:hover { filter: brightness(1.15); }
+
+/* dock */
+#taskbar { border-radius: 24px !important; }
+#taskbar .launcher-button {
+  background: linear-gradient(160deg, #7a7a86, #3a3a44) !important;
+  border: .5px solid rgba(255,255,255,.3) !important; border-radius: 12px !important;
+  box-shadow: 0 4px 10px rgba(0,0,0,.3) !important;
+}
+#taskbar .launcher-button::before { content: "🚀" !important; font-size: 24px; color: #fff; }
+.dock-app {
+  background: linear-gradient(160deg, rgba(255,255,255,.32), rgba(255,255,255,.08)) !important;
+  border: .5px solid rgba(255,255,255,.28) !important; border-radius: 12px !important;
+  box-shadow: 0 4px 10px rgba(0,0,0,.25) !important;
+  transform-origin: 50% 100%;
+  transition: transform .16s cubic-bezier(.3,1.6,.5,1), background .2s !important;
+}
+.dock-app:hover { transform: translateY(-12px) scale(1.4) !important; background: linear-gradient(160deg, rgba(255,255,255,.45), rgba(255,255,255,.14)) !important; }
+.dock-app:hover + .dock-app, .dock-app:has(+ .dock-app:hover) { transform: translateY(-6px) scale(1.18) !important; }
+.dock-app.active { background: rgba(255,255,255,.28) !important; border-color: rgba(255,255,255,.4) !important; }
+.dock-indicator { background: #fff !important; }
+
+/* launcher = full-screen Launchpad */
+#app-launcher:not([hidden]) {
+  position: fixed !important; inset: 0 !important; left: 0 !important; right: 0 !important; top: 0 !important; bottom: 0 !important;
+  width: auto !important; max-width: none !important; height: auto !important; max-height: none !important;
+  transform: none !important; margin: 0 !important; border: 0 !important; border-radius: 0 !important;
+  background: rgba(14,14,24,.38) !important;
+  -webkit-backdrop-filter: blur(46px) saturate(170%) !important; backdrop-filter: blur(46px) saturate(170%) !important;
+  box-shadow: none !important;
+  display: flex !important; flex-direction: column; align-items: center;
+  padding: 64px 40px 130px !important; overflow: auto;
+}
+#app-launcher input[type="search"] {
+  width: 280px !important; max-width: 80%; text-align: center;
+  background: rgba(255,255,255,.16) !important; border: .5px solid rgba(255,255,255,.3) !important;
+  border-radius: 10px !important; color: #fff !important;
+}
+.app-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)) !important; gap: 30px 16px !important; width: 100%; max-width: 860px; margin-top: 48px; }
+.app-icon {
+  width: 72px !important; height: 72px !important; border-radius: 18px !important; font-size: 34px;
+  background: linear-gradient(160deg, rgba(255,255,255,.5), rgba(255,255,255,.12)) !important;
+  border: .5px solid rgba(255,255,255,.35) !important; box-shadow: 0 8px 20px rgba(0,0,0,.3) !important;
+}
+.app-title { color: #fff !important; font-size: 12px; }
+.app-tile:hover, .app-tile:focus-visible { background: transparent !important; border-color: transparent !important; }
+.app-tile:hover .app-icon { transform: scale(1.08); }
+
+/* control center + widgets */
+.cc-tile, .cc-slider, .cc-seg, .cc-notes {
+  background: rgba(255,255,255,.09) !important; border: .5px solid rgba(255,255,255,.14) !important; border-radius: 16px !important;
+}
+.cc-tile i { background: rgba(255,255,255,.14) !important; }
+.cc-tile.on i, .cc-seg button.on, .cal .today { background: #0a84ff !important; color: #fff !important; }
+.cc-link { color: #64b5ff !important; }
+
+/* context menu + snap preview */
+#ctx-menu { border-radius: 10px !important; }
+#ctx-menu button:hover:not(:disabled), #ctx-menu button:focus-visible { background: #0a84ff !important; color: #fff !important; }
+#snap-preview { background: rgba(10,132,255,.14) !important; border-color: rgba(10,132,255,.5) !important; }
+
+/* file manager */
+.win[data-app-id="files"] .body,
+.win[data-app-id="files"] .body > div:nth-child(3) { background: transparent !important; }
+.win[data-app-id="files"] .body > div:nth-child(1),
+.win[data-app-id="files"] .body > div:nth-child(2),
+.win[data-app-id="files"] .body > div:nth-child(4) { background: rgba(255,255,255,.05) !important; }
+.win[data-app-id="files"] .body > div:nth-child(3) > div:hover { background: rgba(255,255,255,.12) !important; }
+
+/* terminal */
+.win[data-app-id="terminal"] .body { background: rgba(8,8,12,.38) !important; }
+.win[data-app-id="terminal"] .body > div:first-child { background: transparent !important; }
+.win[data-app-id="terminal"] .body > div:nth-child(2) {
+  background: rgba(28,28,36,.6) !important; color: #f2f2f7 !important;
+  -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
+  border-top: .5px solid rgba(255,255,255,.18) !important;
+}
+.xterm, .xterm-viewport, .xterm-screen { background: transparent !important; }

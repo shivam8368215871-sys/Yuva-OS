@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0d1014">
+  <title>YuVA Desktop</title>
+
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/css/xterm.css">
+  <script src="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/lib/xterm.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@xterm/addon-fit@0.10.0/lib/addon-fit.js"></script>
+
+  <style>
+    :root {
+      color-scheme: dark;
+      --surface: #181825;
+      --panel: #1e1e2e;
+      --raised: #313244;
+      --border: #45475a;
+      --text: #cdd6f4;
+      --muted: #a6adc8;
+      --accent: #89b4fa;
+      --dock-height: 58px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      height: 100dvh;
+      background: var(--panel);
+      color: var(--text);
+      font-family: system-ui, sans-serif;
+      overflow: hidden;
+    }
+
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+
+    #desktop {
+      position: absolute;
+      inset: 0 0 var(--dock-height) 0;
+      overflow: hidden;
+      background:
+        radial-gradient(ellipse at 50% 10%, #313244 0%, transparent 65%),
+        var(--panel);
+    }
+
+    #taskbar {
+      position: absolute;
+      z-index: 100000;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: var(--dock-height);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 12px;
+      background: #11111b;
+      border-top: 1px solid #313244;
+    }
+
+    .launcher-button,
+    .dock-app {
+      border: 1px solid transparent;
+      border-radius: 10px;
+      color: var(--text);
+      background: var(--raised);
+      min-height: 42px;
+    }
+
+    .launcher-button {
+      flex-shrink: 0;
+      padding: 0 14px;
+      font-weight: 650;
+    }
+
+    .launcher-button:hover,
+    .dock-app:hover {
+      background: #45475a;
+    }
+
+    #app-dock {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      overflow-x: auto;
+      min-width: 0;
+      flex: 1;
+      scrollbar-width: thin;
+    }
+
+    .dock-app {
+      position: relative;
+      flex-shrink: 0;
+      width: 44px;
+      height: 44px;
+      font-size: 22px;
+    }
+
+    .dock-app.active {
+      border-color: var(--accent);
+      background: #45475a;
+    }
+
+    .dock-indicator {
+      position: absolute;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: transparent;
+      bottom: 3px;
+      left: calc(50% - 2.5px);
+    }
+
+    .dock-app.is-open .dock-indicator {
+      background: var(--muted);
+    }
+
+    .dock-app.active .dock-indicator {
+      background: var(--accent);
+    }
+
+    #app-launcher {
+      position: absolute;
+      z-index: 100001;
+      bottom: calc(var(--dock-height) + 10px);
+      left: 12px;
+      width: min(420px, calc(100vw - 24px));
+      max-height: min(560px, calc(100dvh - 90px));
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      gap: 12px;
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: #181825f5;
+      box-shadow: 0 18px 55px #0009;
+      backdrop-filter: blur(16px);
+    }
+
+    #app-launcher[hidden] { display: none; }
+
+    #app-launcher input {
+      width: 100%;
+      min-height: 44px;
+      padding: 10px 12px;
+      color: var(--text);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      outline: none;
+    }
+
+    #app-launcher input:focus {
+      border-color: var(--accent);
+    }
+
+    .app-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      align-content: start;
+      overflow-y: auto;
+    }
+
+    .app-tile {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 5px;
+      border: 1px solid transparent;
+      border-radius: 12px;
+      background: transparent;
+      color: var(--text);
+    }
+
+    .app-tile:hover,
+    .app-tile:focus-visible {
+      background: var(--raised);
+      border-color: var(--border);
+    }
+
+    .app-icon {
+      display: grid;
+      place-items: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 13px;
+      background: #313244;
+      font-size: 25px;
+    }
+
+    .app-title {
+      max-width: 100%;
+      overflow-wrap: anywhere;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .no-apps {
+      grid-column: 1 / -1;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .win {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-width: 280px;
+      min-height: 180px;
+      max-width: 100%;
+      max-height: 100%;
+      resize: both;
+      border: 1px solid #45475a;
+      border-radius: 10px;
+      background: #fff;
+      color: #111;
+      box-shadow: 0 8px 32px #0008;
+    }
+
+    .bar {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 42px;
+      padding: 5px 8px 5px 12px;
+      background: #313244;
+      color: var(--text);
+      cursor: move;
+      touch-action: none;
+      user-select: none;
+    }
+
+    .window-title {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .window-controls {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .window-controls button {
+      display: grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      padding: 0;
+      border: 0;
+      border-radius: 6px;
+      color: var(--text);
+      background: transparent;
+      font-size: 17px;
+    }
+
+    .window-controls button:hover { background: #585b70; }
+    .window-controls .window-close:hover { background: #e64553; color: white; }
+
+    .body {
+      flex: 1;
+      min-height: 0;
+      min-width: 0;
+      overflow: auto;
+      background: white;
+    }
+
+    button:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    @media (max-width: 480px) {
+      .launcher-button { padding: 0 10px; }
+      #taskbar { gap: 6px; padding: 6px; }
+      .app-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+  </style>
+<link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="glass.css">
+</head>
+<body>
+  <main id="desktop" aria-label="YuVA desktop"></main>
+  <footer id="taskbar" aria-label="Desktop dock"></footer>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

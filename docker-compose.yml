@@ -1,0 +1,43 @@
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "127.0.0.1:8080:8080"
+    env_file:
+      - .env
+    environment:
+      PGHOST: postgres
+      PGPORT: "5432"
+      PGDATABASE: yuva
+      PGUSER: yuva
+      PGPASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      YUVA_LOCAL_DESKTOP: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./frontend:/app/frontend:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: yuva
+      POSTGRES_USER: yuva
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - yuva-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U yuva -d yuva"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  yuva-postgres-data:
+  yuva-workspace:
+    external: true
+  yuva-user-home:
+    external: true
+    name: yuva-home-db789f4e-a926-412c-9ad9-c1ade9199980
