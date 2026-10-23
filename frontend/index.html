@@ -295,5 +295,77 @@
   <main id="desktop" aria-label="YuVA desktop"></main>
   <footer id="taskbar" aria-label="Desktop dock"></footer>
   <script type="module" src="src/main.js"></script>
+
+  <script>
+    // 1. Battery aur Focus ko dynamically remove karna
+    function purgeElements() {
+      // Top bar battery text/icon hatana
+      document.querySelectorAll('#tray span, .tray-pill span, div, button').forEach(el => {
+        if (el.children.length === 0 && (el.textContent.includes('⚡') || el.textContent.includes('100%'))) {
+          el.remove();
+        }
+      });
+      // Focus tile hatana
+      document.querySelectorAll('.cc-tiles button, .tile').forEach(btn => {
+        // focus preserved
+      });
+    }
+
+    // 2. Materials (Classic, Glass, Liquid) & Dark Mode Live Switch
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('button, .tile');
+      if (!btn) return;
+      const text = (btn.innerText || btn.textContent || '').trim().toLowerCase();
+
+      // Material switch
+      if (text.includes('classic') || text.includes('glass') || text.includes('liquid')) {
+        let mat = 'classic';
+        if (text.includes('glass')) mat = 'glass';
+        if (text.includes('liquid')) mat = 'liquid';
+
+        document.documentElement.setAttribute('data-material', mat);
+        document.body.setAttribute('data-material', mat);
+        localStorage.setItem('yuva_mat', mat);
+
+        // Highlight active button
+        btn.parentElement?.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      }
+
+      // Dark theme switch
+      if (text.includes('dark') || text.includes('theme') || text.includes('light')) {
+        const isCurrentlyDark = document.body.getAttribute('data-theme') !== 'light';
+        const nextTheme = isCurrentlyDark ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', nextTheme);
+        document.body.setAttribute('data-theme', nextTheme);
+        document.body.classList.toggle('light-theme', nextTheme === 'light');
+        localStorage.setItem('yuva_theme', nextTheme);
+      }
+    }, true);
+
+    // Continuous cleaner observer
+    const obs = new MutationObserver(purgeElements);
+    obs.observe(document.documentElement, { childList: true, subtree: true });
+    window.addEventListener('load', () => {
+      purgeElements();
+      const savedMat = localStorage.getItem('yuva_mat') || 'liquid';
+      document.documentElement.setAttribute('data-material', savedMat);
+      document.body.setAttribute('data-material', savedMat);
+    });
+  </script>
+
+<script>
+  function killBatteryPill() {
+    document.querySelectorAll('#tray *, .tray-pill *, header *').forEach(el => {
+      if (el.textContent && (el.textContent.includes('⚡') || el.textContent.includes('100%'))) {
+        el.style.display = 'none';
+        el.innerHTML = '';
+      }
+    });
+  }
+  setInterval(killBatteryPill, 30);
+  window.addEventListener('load', killBatteryPill);
+</script>
 </body>
+
 </html>

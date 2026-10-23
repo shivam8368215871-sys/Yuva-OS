@@ -145,3 +145,685 @@ body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, sys
   border-top: .5px solid rgba(255,255,255,.18) !important;
 }
 .xterm, .xterm-viewport, .xterm-screen { background: transparent !important; }
+/* ===================================================
+   TRAY & CONTROL CENTER MODERN OVERHAUL
+   =================================================== */
+
+/* 1. Hide Battery Indicator */
+[data-id="battery"], .tray-battery, #tray .battery, #taskbar .battery,
+#tray span:has(svg[data-icon="battery-charging"]), 
+.tray-pill:has(svg[data-icon*="battery"]) {
+  display: none !important;
+}
+
+/* 2. Reshaped Modern Capsule Tiles */
+.control-center .tile, .quick-settings .tile, [class*="tile"] {
+  border-radius: 16px !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  padding: 10px 14px !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  cursor: pointer !important;
+}
+
+.control-center .tile:hover, .quick-settings .tile:hover {
+  background: rgba(255, 255, 255, 0.16) !important;
+  transform: translateY(-2px) !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
+}
+
+.control-center .tile.active, .quick-settings .tile.active {
+  background: linear-gradient(135deg, #0ea5e9, #2563eb) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(14, 165, 233, 0.4) !important;
+}
+
+/* 3. Segmented Material Tabs (Classic / Glass / Liquid) */
+.material-selector, .seg, [class*="segmented"] {
+  background: rgba(0, 0, 0, 0.35) !important;
+  padding: 4px !important;
+  border-radius: 14px !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  display: flex !important;
+  gap: 4px !important;
+}
+
+.material-selector button, .seg button {
+  flex: 1 !important;
+  border-radius: 10px !important;
+  border: none !important;
+  padding: 6px 12px !important;
+  color: #cbd5e1 !important;
+  background: transparent !important;
+  font-weight: 500 !important;
+  font-size: 0.85rem !important;
+  cursor: pointer !important;
+  transition: all 0.18s ease !important;
+}
+
+.material-selector button.active, .seg button.active {
+  background: linear-gradient(135deg, #38bdf8, #0284c7) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.5) !important;
+}
+
+/* ===================================================
+   MATERIAL SYSTEM LIVE MODES (Classic / Glass / Liquid)
+   =================================================== */
+
+/* Glass Material (Crisp High-Blur Frosted Glass) */
+body[data-material="glass"] .window,
+body[data-material="glass"] #taskbar,
+body[data-material="glass"] .control-center,
+body[data-material="glass"] .widget-card {
+  background: rgba(15, 23, 42, 0.55) !important;
+  backdrop-filter: blur(32px) saturate(210%) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(210%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.22) !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7) !important;
+}
+
+/* Liquid Material (Smooth Glossy Vibrant Tint) */
+body[data-material="liquid"] .window,
+body[data-material="liquid"] #taskbar,
+body[data-material="liquid"] .control-center,
+body[data-material="liquid"] .widget-card {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.65), rgba(15, 23, 42, 0.8)) !important;
+  backdrop-filter: blur(40px) saturate(240%) hue-rotate(10deg) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(240%) hue-rotate(10deg) !important;
+  border: 1px solid rgba(56, 189, 248, 0.35) !important;
+  box-shadow: 0 20px 45px rgba(14, 165, 233, 0.25) !important;
+}
+
+/* Classic Material (Solid Opaque Matte Finish) */
+body[data-material="classic"] .window,
+body[data-material="classic"] #taskbar,
+body[data-material="classic"] .control-center,
+body[data-material="classic"] .widget-card {
+  background: #1e293b !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* ===================================================
+   DARK / LIGHT THEME LIVE SWITCH
+   =================================================== */
+html[data-theme="light"], body.light-theme {
+  --bg-core: #e2e8f0 !important;
+  filter: invert(0.88) hue-rotate(180deg);
+}
+
+html[data-theme="light"] img,
+html[data-theme="light"] video,
+html[data-theme="light"] .wallpaper {
+  filter: invert(1) hue-rotate(180deg) !important;
+}
+
+/* ================================================
+   CONTROL CENTER FILED FIX & REAL DARK THEME
+   ================================================ */
+
+/* 1. Hide Battery & Focus Completely */
+*[data-id*="battery"], .tray-battery, #tray .tray-pill:has([data-icon*OKbattery]),
+#tray span:contains("100%"), .tile:has([data-icon*OKfocus]), .tile:has(div:contains("Focus")) {
+  display: none !important;
+}
+
+/* 2. Reshape Buttons & Fix Text Overflow */
+.quick-settings, .tray-menu grid, #control-center grid, div:has(> .tile) {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 12px !important;
+  padding: 4px !important;
+}
+
+.tile, .quick-tile {
+  width: 100% !important;
+  min-height: 52px !important;
+  padding: 8px 12px !important;
+  border-radius: 16px !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+.tile .label, .tile span, .tile div {
+  max-width: 100px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  font-size: 12px !important;
+  line-height: 1.2 !important;
+}
+
+/* 3. REAL DEEP D@+ THEME (NO INVERT) */
+html[data-theme="dark"], body.dark-theme, html[data-theme="dark"] body {
+  --bg-core: #05070a !important;
+  background: #05070a !important;
+  filter: none !important;
+}
+
+/* Dark mode windows & panels */
+html[data-theme="dark"] .window, 
+html[data-theme="dark"] #taskbar,
+html[data-theme="dark"] div:has(> .tile) {
+  background: rgba(0, 0, 0, 0.88) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.95) !important;
+}
+
+/* ===================================================
+   CONTROL CENTER CLEANUP & ZERO OVERFLOW FIX
+   =================================================== */
+
+/* 1. Hide Battery & Focus Safely */
+[data-id*="battery"],
+.tray-battery,
+.tray-pill:has(svg[data-icon*="battery"]),
+.tile:has(span:contains("Focus")),
+.tile:nth-child(4) {
+  display: none !important;
+}
+
+/* 2. Reshape Tiles to Modern Rounded Capsules */
+.tile, .quick-tile {
+  min-height: 54px !important;
+  border-radius: 16px !important;
+  padding: 8px 12px !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+/* 3. Text Overflow Fix - Text box ke andar lock rahega */
+.tile > div, .tile span, .tile b, .tile p {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 105px !important;
+  display: block !important;
+}
+
+/* 4. Real Deep OLED Dark Theme (No Light Invert) */
+html[data-theme="dark"], body[data-theme="dark"] {
+  --bg-core: #030712 !important;
+  filter: none !important;
+}
+
+html[data-theme="dark"] #taskbar,
+html[data-theme="dark"] .tray-menu,
+html[data-theme="dark"] .window {
+  background: rgba(10, 15, 26, 0.92) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9) !important;
+}
+
+/* 5. Material Buttons Polish (Classic / Glass / Liquid) */
+.seg, .material-selector {
+  border-radius: 14px !important;
+  background: rgba(0, 0, 0, 0.4) !important;
+  padding: 4px !important;
+}
+
+.seg button.active, .material-selector button.active {
+  background: #0284c7 !important;
+  color: #ffffff !important;
+  border-radius: 10px !important;
+}
+
+/* ===================================================
+   CONTROL CENTER CLEANUP & ZERO OVERFLOW FIX
+   =================================================== */
+
+/* 1. Hide Battery & Focus Safely */
+[data-id*="battery"],
+.tray-battery,
+.tray-pill:has(svg[data-icon*="battery"]),
+.tile:has(span:contains("Focus")),
+.tile:nth-child(4) {
+  display: none !important;
+}
+
+/* 2. Reshape Tiles to Modern Rounded Capsules */
+.tile, .quick-tile {
+  min-height: 54px !important;
+  border-radius: 16px !important;
+  padding: 8px 12px !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+/* 3. Text Overflow Fix - Text box ke andar lock rahega */
+.tile > div, .tile span, .tile b, .tile p {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 105px !important;
+  display: block !important;
+}
+
+/* 4. Real Deep OLED Dark Theme (No Light Invert) */
+html[data-theme="dark"], body[data-theme="dark"] {
+  --bg-core: #030712 !important;
+  filter: none !important;
+}
+
+html[data-theme="dark"] #taskbar,
+html[data-theme="dark"] .tray-menu,
+html[data-theme="dark"] .window {
+  background: rgba(10, 15, 26, 0.92) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9) !important;
+}
+
+/* 5. Material Buttons Polish (Classic / Glass / Liquid) */
+.seg, .material-selector {
+  border-radius: 14px !important;
+  background: rgba(0, 0, 0, 0.4) !important;
+  padding: 4px !important;
+}
+
+.seg button.active, .material-selector button.active {
+  background: #0284c7 !important;
+  color: #ffffff !important;
+  border-radius: 10px !important;
+}
+
+/* ===================================================
+   CONTROL PANEL POLISH & NO TEXT OVERFLOW
+   =================================================== */
+
+/* Hide any remaining battery elements */
+[data-id*="battery"], .battery, .tray-pill span:has(svg) {
+  display: none !important;
+}
+
+/* Control Panel Grid: 2 balanced columns with proper width */
+.tray-menu, div:has(> .tile) {
+  width: 320px !important;
+}
+
+.tile {
+  min-height: 52px !important;
+  padding: 8px 12px !important;
+  border-radius: 14px !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  box-sizing: border-box !important;
+}
+
+/* Text boundary inside tile */
+.tile > div, .tile span, .tile b {
+  font-size: 11px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 90px !important;
+  display: block !important;
+}
+
+/* Material Switch Active Styling */
+.seg button.active {
+  background: #0284c7 !important;
+  color: #fff !important;
+}
+
+/* ===================================================
+   FLOATING MODERN COLORFUL DOCK
+   =================================================== */
+#taskbar {
+  position: fixed !important;
+  bottom: 16px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  height: 58px !important;
+  padding: 0 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  background: rgba(15, 23, 42, 0.75) !important;
+  backdrop-filter: blur(25px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(25px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  border-radius: 22px !important;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.7) !important;
+  z-index: 99999 !important;
+  overflow: visible !important;
+}
+
+#taskbar button, .launcher-button, [data-app] {
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 12px !important;
+  border: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  cursor: pointer !important;
+}
+
+#taskbar button:hover, .launcher-button:hover, [data-app]:hover {
+  transform: translateY(-6px) scale(1.1) !important;
+}
+
+/* Vibrant App Colors */
+.launcher-button { background: linear-gradient(135deg, #f43f5e, #be123c) !important; }
+[data-app="files"] { background: linear-gradient(135deg, #0284c7, #0369a1) !important; }
+[data-app="terminal"] { background: linear-gradient(135deg, #1e293b, #0f172a) !important; border: 1px solid #22c55e !important; }
+[data-app="browser"] { background: linear-gradient(135deg, #0ea5e9, #2563eb) !important; }
+[data-app="jupyter"] { background: linear-gradient(135deg, #f97316, #c2410c) !important; }
+[data-app="editor"], [data-app="notes"] { background: linear-gradient(135deg, #a855f7, #6d28d9) !important; }
+[data-app="calculator"] { background: linear-gradient(135deg, #10b981, #047857) !important; }
+[data-app="calendar"], [data-app="clock"] { background: linear-gradient(135deg, #f59e0b, #b45309) !important; }
+[data-app="tasks"] { background: linear-gradient(135deg, #06b6d4, #0e7490) !important; }
+[data-app="paint"] { background: linear-gradient(135deg, #ec4899, #be185d) !important; }
+[data-app="settings"] { background: linear-gradient(135deg, #64748b, #334155) !important; }
+
+#taskbar svg, #taskbar img {
+  width: 22px !important;
+  height: 22px !important;
+  stroke: #ffffff !important;
+  color: #ffffff !important;
+  pointer-events: none !important;
+}
+
+/* REMOVE SCROLLBARS */
+html, body, #desktop, #taskbar, footer {
+  overflow-x: hidden !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+*::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* HIDE BATTERY & FOCUS SAFELY */
+[data-id*="battery"], .tray-battery, .tile:nth-child(4) {
+  display: none !important;
+}
+
+/* CONTROL PANEL BOX & GRID */
+div:has(> .tile), .quick-settings, .tray-menu {
+  width: 320px !important;
+  box-sizing: border-box !important;
+}
+
+/* TILES SHAPE & BOUNDARIES */
+.tile {
+  min-height: 52px !important;
+  padding: 8px 12px !important;
+  border-radius: 16px !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  box-sizing: border-box !important;
+}
+.tile:hover {
+  background: rgba(255, 255, 255, 0.14) !important;
+  transform: translateY(-2px) !important;
+}
+.tile > div, .tile span, .tile b, .tile p {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 95px !important;
+  display: block !important;
+  line-height: 1.2 !important;
+}
+
+/* MATERIAL SELECTOR */
+.seg, .material-selector {
+  border-radius: 14px !important;
+  background: rgba(0, 0, 0, 0.4) !important;
+  padding: 4px !important;
+  display: flex !important;
+  gap: 4px !important;
+}
+.seg button, .material-selector button {
+  flex: 1 !important;
+  border-radius: 10px !important;
+  border: none !important;
+  padding: 6px 10px !important;
+  color: #cbd5e1 !important;
+  background: transparent !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+}
+.seg button.active, .material-selector button.active {
+  background: linear-gradient(135deg, #0ea5e9, #0284c7) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(14, 165, 233, 0.5) !important;
+}
+
+/* ===================================================
+   CC-TILES OVERFLOW FIX & ROUNDED CAPSULES
+   =================================================== */
+.cc-tiles {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 10px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.cc-tiles > button {
+  min-height: 54px !important;
+  padding: 8px 12px !important;
+  border-radius: 16px !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  text-align: left !important;
+}
+
+.cc-tiles > button:hover {
+  background: rgba(255, 255, 255, 0.14) !important;
+  transform: translateY(-2px) !important;
+}
+
+.cc-tiles > button span {
+  display: flex !important;
+  flex-direction: column !important;
+  min-width: 0 !important;
+  flex: 1 !important;
+  overflow: hidden !important;
+}
+
+.cc-tiles > button b {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #f8fafc !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  line-height: 1.2 !important;
+}
+
+.cc-tiles > button small {
+  font-size: 11px !important;
+  color: #94a3b8 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  line-height: 1.2 !important;
+  margin-top: 2px !important;
+}
+
+/* Real Deep Dark Mode (No Brightness Washout) */
+body.light-theme, html[data-theme="light"] {
+  filter: none !important;
+}
+
+/* ===================================================
+   PERMANENT DOCK JITTER & SCROLLBAR ELIMINATION
+   =================================================== */
+
+/* Dock container ko flexible aur overflow visible banayein */
+#taskbar, footer#taskbar, .dock {
+  overflow: visible !important;
+  overflow-x: visible !important;
+  overflow-y: visible !important;
+  height: 56px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+/* Scrollbar ko completely strip karein */
+#taskbar::-webkit-scrollbar,
+footer#taskbar::-webkit-scrollbar,
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Button sizing lock - Box layout resize nahi hoga */
+#taskbar button, .launcher-button, [data-app] {
+  position: relative !important;
+  flex-shrink: 0 !important;
+  margin: 0 4px !important;
+  will-change: transform !important;
+  transform: translateZ(0) !important;
+  backface-visibility: hidden !important;
+}
+
+/* Smooth stable float hover bina layout hilaye */
+#taskbar button:hover, .launcher-button:hover, [data-app]:hover {
+  transform: translateY(-6px) translateZ(0) !important;
+  transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+}
+
+/* ===================================================
+   LIVE MATERIAL & DARK ENGINE
+   =================================================== */
+
+/* Real Deep Dark Mode */
+html[data-theme="dark"], body:not(.light-theme) {
+  --bg-core: #090d16 !important;
+  color-scheme: dark !important;
+  filter: none !important;
+}
+
+html[data-theme="dark"] .window,
+body:not(.light-theme) .window,
+html[data-theme="dark"] .tray-menu,
+body:not(.light-theme) .tray-menu {
+  background: rgba(13, 17, 28, 0.85) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #f8fafc !important;
+}
+
+/* Classic Material (Matte Solid) */
+[data-material="classic"] #taskbar,
+[data-material="classic"] .tray-menu,
+[data-material="classic"] .window {
+  background: #111827 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
+}
+
+/* Glass Material (Frosted Blur Glass) */
+[data-material="glass"] #taskbar,
+[data-material="glass"] .tray-menu,
+[data-material="glass"] .window {
+  background: rgba(15, 23, 42, 0.6) !important;
+  backdrop-filter: blur(28px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 20px 45px -8px rgba(0, 0, 0, 0.75) !important;
+}
+
+/* Liquid Material (Glossy Fluid Neon) */
+[data-material="liquid"] #taskbar,
+[data-material="liquid"] .tray-menu,
+[data-material="liquid"] .window {
+  background: linear-gradient(135deg, rgba(30, 58, 138, 0.45), rgba(15, 23, 42, 0.7)) !important;
+  backdrop-filter: blur(36px) saturate(230%) !important;
+  -webkit-backdrop-filter: blur(36px) saturate(230%) !important;
+  border: 1px solid rgba(56, 189, 248, 0.35) !important;
+  box-shadow: 0 20px 50px rgba(14, 165, 233, 0.25) !important;
+}
+
+/* ===================================================
+   REAL FUNCTIONING MATERIALS & DARK THEME
+   =================================================== */
+
+/* 1. REAL DEEP DARK THEME */
+html[data-theme="dark"], body:not(.light-theme) {
+  --bg-core: #090d16 !important;
+  color-scheme: dark !important;
+}
+
+/* 2. CLASSIC MATERIAL (Solid Matte Finish) */
+[data-material="classic"] #taskbar,
+[data-material="classic"] .tray-menu,
+[data-material="classic"] .window,
+[data-material="classic"] div:has(> .cc-tiles) {
+  background: #111827 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7) !important;
+}
+
+/* 3. GLASS MATERIAL (Deep Frosted Glass Blur) */
+[data-material="glass"] #taskbar,
+[data-material="glass"] .tray-menu,
+[data-material="glass"] .window,
+[data-material="glass"] div:has(> .cc-tiles) {
+  background: rgba(15, 23, 42, 0.6) !important;
+  backdrop-filter: blur(28px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 20px 45px -8px rgba(0, 0, 0, 0.75), inset 0 1px 1px rgba(255, 255, 255, 0.25) !important;
+}
+
+/* 4. LIQUID MATERIAL (Glossy Fluid Neon Hue) */
+[data-material="liquid"] #taskbar,
+[data-material="liquid"] .tray-menu,
+[data-material="liquid"] .window,
+[data-material="liquid"] div:has(> .cc-tiles) {
+  background: linear-gradient(135deg, rgba(30, 58, 138, 0.5), rgba(15, 23, 42, 0.75)) !important;
+  backdrop-filter: blur(36px) saturate(230%) !important;
+  -webkit-backdrop-filter: blur(36px) saturate(230%) !important;
+  border: 1px solid rgba(56, 189, 248, 0.4) !important;
+  box-shadow: 0 20px 50px rgba(14, 165, 233, 0.3), inset 0 1px 2px rgba(125, 211, 252, 0.4) !important;
+}
+/* Strict Battery removal */
+.tray-pill > span:has(svg),
+.tray-pill span:last-child {
+  display: none !important;
+}
