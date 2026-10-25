@@ -1,11 +1,14 @@
 /* glass.css: macOS-style glass layer, loaded after theme.css.
    Undo: delete this file and its <link> in index.html. */
 
-html:root, html.mat-classic:root, html.mat-glass:root, html.mat-liquid:root {
+html:root,
+html.mat-classic:root,
+html.mat-glass:root,
+html.mat-liquid:root {
   --accent: #000;
-  --surface: rgba(34,34,42,.5) !important;
-  --bar-bg: rgba(255,255,255,.06) !important;
-  --border: rgba(255,255,255,.16) !important;
+  --surface: rgba(34, 34, 42, .5) !important;
+  --bar-bg: rgba(255, 255, 255, .06) !important;
+  --border: rgba(255, 255, 255, .16) !important;
   --bf: blur(36px) saturate(180%) !important;
 }
 
@@ -17,147 +20,361 @@ html {
     radial-gradient(1200px 800px at 50% 110%, #9b7bff 0, transparent 0%),
     #5b6bd6;
 }
-body:not([style*="background"]) { background: transparent !important; }
-body::before { display: none !important; }
-body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, system-ui, sans-serif !important; color: #f2f2f7; }
-::selection { background: rgba(10,132,255,.35); }
+
+body:not([style*="background"]) {
+  background: transparent !important;
+}
+
+body::before {
+  display: none !important;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, system-ui, sans-serif !important;
+  color: #f2f2f7;
+}
+
+::selection {
+  background: rgba(10, 132, 255, .35);
+}
 
 /* glass on every surface */
-#island, #taskbar, #quick-panel, #app-launcher, .widget, #ctx-menu, .win {
+#island,
+#taskbar,
+#quick-panel,
+#app-launcher,
+.widget,
+#ctx-menu,
+.win {
   background: rgba(0, 0, 0, 1) !important;
   -webkit-backdrop-filter: blur(36px) saturate(180%) !important;
   backdrop-filter: blur(36px) saturate(180%) !important;
-  border: .5px solid rgba(255,255,255,.18) !important;
-  box-shadow: 0 22px 55px rgba(0,0,0,.38), inset 0 .5px 0 rgba(255,255,255,.25) !important;
+  border: .5px solid rgba(255, 255, 255, .18) !important;
+  box-shadow: 0 22px 55px rgba(0, 0, 0, .38), inset 0 .5px 0 rgba(255, 255, 255, .25) !important;
 }
-#island { border-radius: 999px !important; }
-#island .isl-btn:hover { background: rgba(255,255,255,.14) !important; }
-#island .isl-app, #island .isl-date { color: #f2f2f7 !important; }
-#quick-panel { border-radius: 24px !important; }
-.widget { border-radius: 22px !important; }
+
+#island {
+  border-radius: 999px !important;
+}
+
+#island .isl-btn:hover {
+  background: rgba(255, 255, 255, .14) !important;
+}
+
+#island .isl-app,
+#island .isl-date {
+  color: #f2f2f7 !important;
+}
+
+#quick-panel {
+  border-radius: 24px !important;
+}
+
+.widget {
+  border-radius: 22px !important;
+}
 
 /* windows */
-.win { border-radius: 12px !important; }
-.win:not(.inactive) {
-  border-color: rgba(255,255,255,.22) !important;
-  box-shadow: 0 28px 70px rgba(0,0,0,.5), 0 0 0 .5px rgba(0,0,0,.6), inset 0 .5px 0 rgba(255,255,255,.28) !important;
+.win {
+  border-radius: 12px !important;
 }
-.win.inactive { box-shadow: 0 10px 30px rgba(0,0,0,.3) !important; }
+
+.win:not(.inactive) {
+  border-color: rgba(255, 255, 255, .22) !important;
+  box-shadow: 0 28px 70px rgba(0, 0, 0, .5), 0 0 0 .5px rgba(0, 0, 0, .6), inset 0 .5px 0 rgba(255, 255, 255, .28) !important;
+}
+
+.win.inactive {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .3) !important;
+}
+
 .win .bar {
   position: relative;
-  background: linear-gradient(rgba(255,255,255,.12), rgba(255,255,255,0)) !important;
-  -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
-  border-bottom: .5px solid rgba(255,255,255,.1) !important;
+  background: linear-gradient(rgba(255, 255, 255, .12), rgba(255, 255, 255, 0)) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  border-bottom: .5px solid rgba(255, 255, 255, .1) !important;
   box-shadow: none !important;
 }
-.win:not(.inactive) .bar { box-shadow: none !important; }
-.win .body { background: transparent !important; }
+
+.win:not(.inactive) .bar {
+  box-shadow: none !important;
+}
+
+.win .body {
+  background: transparent !important;
+}
 
 /* centered title */
-.window-head { position: absolute !important; left: 50%; top: 50%; transform: translate(-50%,-50%); pointer-events: none; }
-.window-title { font-weight: 600; font-size: 13px; color: #f2f2f7; opacity: .9; }
+.window-head {
+  position: absolute !important;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.window-title {
+  font-weight: 600;
+  font-size: 13px;
+  color: #f2f2f7;
+  opacity: .9;
+}
 
 /* traffic lights on the left */
-.window-controls { order: -1; display: flex; gap: 8px; z-index: 2; margin-right: 8px; }
-.window-controls button {
-  width: 12px !important; height: 12px !important; min-width: 12px !important; padding: 0 !important;
-  border-radius: 50% !important; font-size: 0 !important; color: transparent !important;
-  border: .5px solid rgba(0,0,0,.25) !important;
+.window-controls {
+  order: -1;
+  display: flex;
+  gap: 8px;
+  z-index: 2;
+  margin-right: 8px;
 }
-.window-controls button:nth-child(1), .window-controls button:nth-child(1):hover { background: #febc2e !important; }
-.window-controls button:nth-child(2), .window-controls button:nth-child(2):hover { background: #28c840 !important; }
-.window-controls button.window-close, .window-controls button.window-close:hover { background: #ff5f57 !important; order: -1; }
-.window-controls button:hover { filter: brightness(1.15); }
+
+.window-controls button {
+  width: 12px !important;
+  height: 12px !important;
+  min-width: 12px !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  font-size: 0 !important;
+  color: transparent !important;
+  border: .5px solid rgba(0, 0, 0, .25) !important;
+}
+
+.window-controls button:nth-child(1),
+.window-controls button:nth-child(1):hover {
+  background: #febc2e !important;
+}
+
+.window-controls button:nth-child(2),
+.window-controls button:nth-child(2):hover {
+  background: #28c840 !important;
+}
+
+.window-controls button.window-close,
+.window-controls button.window-close:hover {
+  background: #ff5f57 !important;
+  order: -1;
+}
+
+.window-controls button:hover {
+  filter: brightness(1.15);
+}
 
 /* dock */
-#taskbar { border-radius: 24px !important; }
+#taskbar {
+  border-radius: 24px !important;
+}
+
 #taskbar .launcher-button {
   background: linear-gradient(160deg, #000, #000) !important;
-  border: .5px solid rgba(255,255,255,.3) !important; border-radius: 12px !important;
-  box-shadow: 0 4px 10px rgba(0,0,0,1) !important;
+  border: .5px solid rgba(255, 255, 255, .3) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 1) !important;
 }
-#taskbar .launcher-button::before { content: "🚀" !important; font-size: 24px; color: #fff; }
+
+#taskbar .launcher-button::before {
+  content: "🚀" !important;
+  font-size: 24px;
+  color: #fff;
+}
+
 .dock-app {
-  background: linear-gradient(160deg, rgba(255,255,255), rgba(0, 0, 0, 1)) !important;
-  border: .5px solid rgba(0, 0, 0, 1) !important; border-radius: 12px !important;
-  box-shadow: 0 4px 10px rgba(0,0,0, 1) !important;
+  background: linear-gradient(160deg, rgba(255, 255, 255), rgba(0, 0, 0, 1)) !important;
+  border: .5px solid rgba(0, 0, 0, 1) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 1) !important;
   transform-origin: 50% 100%;
-  transition: transform .16s cubic-bezier(.3,1.6,.5,1), background .2s !important;
+  transition: transform .16s cubic-bezier(.3, 1.6, .5, 1), background .2s !important;
 }
-.dock-app:hover { transform: translateY(-12px) scale(1.4) !important; background: linear-gradient(160deg, rgba(0, 0, 0, 1), rgba(0, 0, 0, 1)) !important; }
-.dock-app:hover + .dock-app, .dock-app:has(+ .dock-app:hover) { transform: translateY(-6px) scale(1.18) !important; }
-.dock-app.active { background: rgba(255,255,255,.28) !important; border-color: rgba(255,255,255,.4) !important; }
-.dock-indicator { background: #fff !important; }
+
+.dock-app:hover {
+  transform: translateY(-12px) scale(1.4) !important;
+  background: linear-gradient(160deg, rgba(0, 0, 0, 1), rgba(0, 0, 0, 1)) !important;
+}
+
+.dock-app:hover+.dock-app,
+.dock-app:has(+ .dock-app:hover) {
+  transform: translateY(-6px) scale(1.18) !important;
+}
+
+.dock-app.active {
+  background: rgba(255, 255, 255, .28) !important;
+  border-color: rgba(255, 255, 255, .4) !important;
+}
+
+.dock-indicator {
+  background: #fff !important;
+}
 
 /* launcher = full-screen Launchpad */
 #app-launcher:not([hidden]) {
-  position: fixed !important; inset: 0 !important; left: 0 !important; right: 0 !important; top: 0 !important; bottom: 0 !important;
-  width: auto !important; max-width: none !important; height: auto !important; max-height: none !important;
-  transform: none !important; margin: 0 !important; border: 0 !important; border-radius: 0 !important;
-  background: rgba(14,14,24,.38) !important;
-  -webkit-backdrop-filter: blur(46px) saturate(170%) !important; backdrop-filter: blur(46px) saturate(170%) !important;
+  position: fixed !important;
+  inset: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  width: auto !important;
+  max-width: none !important;
+  height: auto !important;
+  max-height: none !important;
+  transform: none !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: rgba(14, 14, 24, .38) !important;
+  -webkit-backdrop-filter: blur(46px) saturate(170%) !important;
+  backdrop-filter: blur(46px) saturate(170%) !important;
   box-shadow: none !important;
-  display: flex !important; flex-direction: column; align-items: center;
-  padding: 64px 40px 130px !important; overflow: auto;
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  padding: 64px 40px 130px !important;
+  overflow: auto;
 }
+
 #app-launcher input[type="search"] {
-  width: 280px !important; max-width: 80%; text-align: center;
-  background: rgba(255,255,255,.16) !important; border: .5px solid rgba(255,255,255,.3) !important;
-  border-radius: 10px !important; color: #fff !important;
+  width: 280px !important;
+  max-width: 80%;
+  text-align: center;
+  background: rgba(255, 255, 255, .16) !important;
+  border: .5px solid rgba(255, 255, 255, .3) !important;
+  border-radius: 10px !important;
+  color: #fff !important;
 }
-.app-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)) !important; gap: 30px 16px !important; width: 100%; max-width: 860px; margin-top: 48px; }
+
+.app-grid {
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)) !important;
+  gap: 30px 16px !important;
+  width: 100%;
+  max-width: 860px;
+  margin-top: 48px;
+}
+
 .app-icon {
-  width: 72px !important; height: 72px !important; border-radius: 18px !important; font-size: 34px;
-  background: linear-gradient(160deg, rgba(255,255,255,.5), rgba(255,255,255,.12)) !important;
-  border: .5px solid rgba(255,255,255,.35) !important; box-shadow: 0 8px 20px rgba(0,0,0,.3) !important;
+  width: 72px !important;
+  height: 72px !important;
+  border-radius: 18px !important;
+  font-size: 34px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, .5), rgba(255, 255, 255, .12)) !important;
+  border: .5px solid rgba(255, 255, 255, .35) !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, .3) !important;
 }
-.app-title { color: #fff !important; font-size: 12px; }
-.app-tile:hover, .app-tile:focus-visible { background: transparent !important; border-color: transparent !important; }
-.app-tile:hover .app-icon { transform: scale(1.08); }
+
+.app-title {
+  color: #fff !important;
+  font-size: 12px;
+}
+
+.app-tile:hover,
+.app-tile:focus-visible {
+  background: transparent !important;
+  border-color: transparent !important;
+}
+
+.app-tile:hover .app-icon {
+  transform: scale(1.08);
+}
 
 /* control center + widgets */
-.cc-tile, .cc-slider, .cc-seg, .cc-notes {
-  background: rgba(255,255,255,.09) !important; border: .5px solid rgba(255,255,255,.14) !important; border-radius: 16px !important;
+.cc-tile,
+.cc-slider,
+.cc-seg,
+.cc-notes {
+  background: rgba(255, 255, 255, .09) !important;
+  border: .5px solid rgba(255, 255, 255, .14) !important;
+  border-radius: 16px !important;
 }
-.cc-tile i { background: rgba(255,255,255,.14) !important; }
-.cc-tile.on i, .cc-seg button.on, .cal .today { background: #0a84ff !important; color: #fff !important; }
-.cc-link { color: #64b5ff !important; }
+
+.cc-tile i {
+  background: rgba(255, 255, 255, .14) !important;
+}
+
+.cc-tile.on i,
+.cc-seg button.on,
+.cal .today {
+  background: #0a84ff !important;
+  color: #fff !important;
+}
+
+.cc-link {
+  color: #64b5ff !important;
+}
 
 /* context menu + snap preview */
-#ctx-menu { border-radius: 10px !important; }
-#ctx-menu button:hover:not(:disabled), #ctx-menu button:focus-visible { background: #0a84ff !important; color: #fff !important; }
-#snap-preview { background: rgba(10,132,255,.14) !important; border-color: rgba(10,132,255,.5) !important; }
+#ctx-menu {
+  border-radius: 10px !important;
+}
+
+#ctx-menu button:hover:not(:disabled),
+#ctx-menu button:focus-visible {
+  background: #0a84ff !important;
+  color: #fff !important;
+}
+
+#snap-preview {
+  background: rgba(10, 132, 255, .14) !important;
+  border-color: rgba(10, 132, 255, .5) !important;
+}
 
 /* file manager */
 .win[data-app-id="files"] .body,
-.win[data-app-id="files"] .body > div:nth-child(3) { background: transparent !important; }
-.win[data-app-id="files"] .body > div:nth-child(1),
-.win[data-app-id="files"] .body > div:nth-child(2),
-.win[data-app-id="files"] .body > div:nth-child(4) { background: rgba(255,255,255,.05) !important; }
-.win[data-app-id="files"] .body > div:nth-child(3) > div:hover { background: rgba(255,255,255,.12) !important; }
+.win[data-app-id="files"] .body>div:nth-child(3) {
+  background: transparent !important;
+}
+
+.win[data-app-id="files"] .body>div:nth-child(1),
+.win[data-app-id="files"] .body>div:nth-child(2),
+.win[data-app-id="files"] .body>div:nth-child(4) {
+  background: rgba(255, 255, 255, .05) !important;
+}
+
+.win[data-app-id="files"] .body>div:nth-child(3)>div:hover {
+  background: rgba(255, 255, 255, .12) !important;
+}
 
 /* terminal */
-.win[data-app-id="terminal"] .body { background: rgba(8,8,12,.38) !important; }
-.win[data-app-id="terminal"] .body > div:first-child { background: transparent !important; }
-.win[data-app-id="terminal"] .body > div:nth-child(2) {
-  background: rgba(28,28,36,.6) !important; color: #f2f2f7 !important;
-  -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
-  border-top: .5px solid rgba(255,255,255,.18) !important;
+.win[data-app-id="terminal"] .body {
+  background: rgba(8, 8, 12, .38) !important;
 }
-.xterm, .xterm-viewport, .xterm-screen { background: transparent !important; }
+
+.win[data-app-id="terminal"] .body>div:first-child {
+  background: transparent !important;
+}
+
+.win[data-app-id="terminal"] .body>div:nth-child(2) {
+  background: rgba(28, 28, 36, .6) !important;
+  color: #f2f2f7 !important;
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border-top: .5px solid rgba(255, 255, 255, .18) !important;
+}
+
+.xterm,
+.xterm-viewport,
+.xterm-screen {
+  background: transparent !important;
+}
+
 /* ===================================================
    TRAY & CONTROL CENTER MODERN OVERHAUL
    =================================================== */
 
 /* 1. Hide Battery Indicator */
-[data-id="battery"], .tray-battery, #tray .battery, #taskbar .battery,
-#tray span:has(svg[data-icon="battery-charging"]), 
+[data-id="battery"],
+.tray-battery,
+#tray .battery,
+#taskbar .battery,
+#tray span:has(svg[data-icon="battery-charging"]),
 .tray-pill:has(svg[data-icon*="battery"]) {
   display: none !important;
 }
 
 /* 2. Reshaped Modern Capsule Tiles */
-.control-center .tile, .quick-settings .tile, [class*="tile"] {
+.control-center .tile,
+.quick-settings .tile,
+[class*="tile"] {
   border-radius: 16px !important;
   background: rgba(255, 255, 255, 0.08) !important;
   border: 1px solid rgba(255, 255, 255, 0.12) !important;
@@ -166,13 +383,15 @@ body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, sys
   cursor: pointer !important;
 }
 
-.control-center .tile:hover, .quick-settings .tile:hover {
+.control-center .tile:hover,
+.quick-settings .tile:hover {
   background: rgba(255, 255, 255, 0.16) !important;
   transform: translateY(-2px) !important;
   border-color: rgba(255, 255, 255, 0.25) !important;
 }
 
-.control-center .tile.active, .quick-settings .tile.active {
+.control-center .tile.active,
+.quick-settings .tile.active {
   background: linear-gradient(135deg, #0ea5e9, #2563eb) !important;
   border-color: rgba(255, 255, 255, 0.4) !important;
   color: #ffffff !important;
@@ -180,7 +399,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, sys
 }
 
 /* 3. Segmented Material Tabs (Classic / Glass / Liquid) */
-.material-selector, .seg, [class*="segmented"] {
+.material-selector,
+.seg,
+[class*="segmented"] {
   background: rgba(0, 0, 0, 0.35) !important;
   padding: 4px !important;
   border-radius: 14px !important;
@@ -189,7 +410,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, sys
   gap: 4px !important;
 }
 
-.material-selector button, .seg button {
+.material-selector button,
+.seg button {
   flex: 1 !important;
   border-radius: 10px !important;
   border: none !important;
@@ -202,7 +424,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, sys
   transition: all 0.18s ease !important;
 }
 
-.material-selector button.active, .seg button.active {
+.material-selector button.active,
+.seg button.active {
   background: linear-gradient(135deg, #38bdf8, #0284c7) !important;
   color: #ffffff !important;
   box-shadow: 0 2px 8px rgba(2, 132, 199, 0.5) !important;
@@ -250,7 +473,8 @@ body[data-material="classic"] .widget-card {
 /* ===================================================
    DARK / LIGHT THEME LIVE SWITCH
    =================================================== */
-html[data-theme="light"], body.light-theme {
+html[data-theme="light"],
+body.light-theme {
   --bg-core: #e2e8f0 !important;
   filter: invert(0.88) hue-rotate(180deg);
 }
@@ -266,20 +490,28 @@ html[data-theme="light"] .wallpaper {
    ================================================ */
 
 /* 1. Hide Battery & Focus Completely */
-*[data-id*="battery"], .tray-battery, #tray .tray-pill:has([data-icon*OKbattery]),
-#tray span:contains("100%"), .tile:has([data-icon*OKfocus]), .tile:has(div:contains("Focus")) {
+*[data-id*="battery"],
+.tray-battery,
+#tray .tray-pill:has([data-icon*OKbattery]),
+#tray span:contains("100%"),
+.tile:has([data-icon*OKfocus]),
+.tile:has(div:contains("Focus")) {
   display: none !important;
 }
 
 /* 2. Reshape Buttons & Fix Text Overflow */
-.quick-settings, .tray-menu grid, #control-center grid, div:has(> .tile) {
+.quick-settings,
+.tray-menu grid,
+#control-center grid,
+div:has(> .tile) {
   display: grid !important;
   grid-template-columns: repeat(2, 1fr) !important;
   gap: 12px !important;
   padding: 4px !important;
 }
 
-.tile, .quick-tile {
+.tile,
+.quick-tile {
   width: 100% !important;
   min-height: 52px !important;
   padding: 8px 12px !important;
@@ -293,7 +525,9 @@ html[data-theme="light"] .wallpaper {
   overflow: hidden !important;
 }
 
-.tile .label, .tile span, .tile div {
+.tile .label,
+.tile span,
+.tile div {
   max-width: 100px !important;
   white-space: nowrap !important;
   overflow: hidden !important;
@@ -303,14 +537,16 @@ html[data-theme="light"] .wallpaper {
 }
 
 /* 3. REAL DEEP D@+ THEME (NO INVERT) */
-html[data-theme="dark"], body.dark-theme, html[data-theme="dark"] body {
+html[data-theme="dark"],
+body.dark-theme,
+html[data-theme="dark"] body {
   --bg-core: #05070a !important;
   background: #05070a !important;
   filter: none !important;
 }
 
 /* Dark mode windows & panels */
-html[data-theme="dark"] .window, 
+html[data-theme="dark"] .window,
 html[data-theme="dark"] #taskbar,
 html[data-theme="dark"] div:has(> .tile) {
   background: rgba(0, 0, 0, 0.88) !important;
@@ -332,7 +568,8 @@ html[data-theme="dark"] div:has(> .tile) {
 }
 
 /* 2. Reshape Tiles to Modern Rounded Capsules */
-.tile, .quick-tile {
+.tile,
+.quick-tile {
   min-height: 54px !important;
   border-radius: 16px !important;
   padding: 8px 12px !important;
@@ -346,7 +583,10 @@ html[data-theme="dark"] div:has(> .tile) {
 }
 
 /* 3. Text Overflow Fix - Text box ke andar lock rahega */
-.tile > div, .tile span, .tile b, .tile p {
+.tile>div,
+.tile span,
+.tile b,
+.tile p {
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
@@ -355,7 +595,8 @@ html[data-theme="dark"] div:has(> .tile) {
 }
 
 /* 4. Real Deep OLED Dark Theme (No Light Invert) */
-html[data-theme="dark"], body[data-theme="dark"] {
+html[data-theme="dark"],
+body[data-theme="dark"] {
   --bg-core: #030712 !important;
   filter: none !important;
 }
@@ -369,13 +610,15 @@ html[data-theme="dark"] .window {
 }
 
 /* 5. Material Buttons Polish (Classic / Glass / Liquid) */
-.seg, .material-selector {
+.seg,
+.material-selector {
   border-radius: 14px !important;
   background: rgba(0, 0, 0, 0.4) !important;
   padding: 4px !important;
 }
 
-.seg button.active, .material-selector button.active {
+.seg button.active,
+.material-selector button.active {
   background: #0284c7 !important;
   color: #ffffff !important;
   border-radius: 10px !important;
@@ -395,7 +638,8 @@ html[data-theme="dark"] .window {
 }
 
 /* 2. Reshape Tiles to Modern Rounded Capsules */
-.tile, .quick-tile {
+.tile,
+.quick-tile {
   min-height: 54px !important;
   border-radius: 16px !important;
   padding: 8px 12px !important;
@@ -409,7 +653,10 @@ html[data-theme="dark"] .window {
 }
 
 /* 3. Text Overflow Fix - Text box ke andar lock rahega */
-.tile > div, .tile span, .tile b, .tile p {
+.tile>div,
+.tile span,
+.tile b,
+.tile p {
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
@@ -418,7 +665,8 @@ html[data-theme="dark"] .window {
 }
 
 /* 4. Real Deep OLED Dark Theme (No Light Invert) */
-html[data-theme="dark"], body[data-theme="dark"] {
+html[data-theme="dark"],
+body[data-theme="dark"] {
   --bg-core: #030712 !important;
   filter: none !important;
 }
@@ -432,13 +680,15 @@ html[data-theme="dark"] .window {
 }
 
 /* 5. Material Buttons Polish (Classic / Glass / Liquid) */
-.seg, .material-selector {
+.seg,
+.material-selector {
   border-radius: 14px !important;
   background: rgba(0, 0, 0, 0.4) !important;
   padding: 4px !important;
 }
 
-.seg button.active, .material-selector button.active {
+.seg button.active,
+.material-selector button.active {
   background: #0284c7 !important;
   color: #ffffff !important;
   border-radius: 10px !important;
@@ -449,12 +699,15 @@ html[data-theme="dark"] .window {
    =================================================== */
 
 /* Hide any remaining battery elements */
-[data-id*="battery"], .battery, .tray-pill span:has(svg) {
+[data-id*="battery"],
+.battery,
+.tray-pill span:has(svg) {
   display: none !important;
 }
 
 /* Control Panel Grid: 2 balanced columns with proper width */
-.tray-menu, div:has(> .tile) {
+.tray-menu,
+div:has(> .tile) {
   width: 320px !important;
 }
 
@@ -471,7 +724,9 @@ html[data-theme="dark"] .window {
 }
 
 /* Text boundary inside tile */
-.tile > div, .tile span, .tile b {
+.tile>div,
+.tile span,
+.tile b {
   font-size: 11px !important;
   white-space: nowrap !important;
   overflow: hidden !important;
@@ -509,7 +764,9 @@ html[data-theme="dark"] .window {
   overflow: visible !important;
 }
 
-#taskbar button, .launcher-button, [data-app] {
+#taskbar button,
+.launcher-button,
+[data-app] {
   width: 44px !important;
   height: 44px !important;
   border-radius: 12px !important;
@@ -521,24 +778,62 @@ html[data-theme="dark"] .window {
   cursor: pointer !important;
 }
 
-#taskbar button:hover, .launcher-button:hover, [data-app]:hover {
+#taskbar button:hover,
+.launcher-button:hover,
+[data-app]:hover {
   transform: translateY(-6px) scale(1.1) !important;
 }
 
 /* Vibrant App Colors */
-.launcher-button { background: linear-gradient(135deg, #f43f5e, #be123c) !important; }
-[data-app="files"] { background: linear-gradient(135deg, #0284c7, #0369a1) !important; }
-[data-app="terminal"] { background: linear-gradient(135deg, #1e293b, #0f172a) !important; border: 1px solid #22c55e !important; }
-[data-app="browser"] { background: linear-gradient(135deg, #0ea5e9, #2563eb) !important; }
-[data-app="jupyter"] { background: linear-gradient(135deg, #f97316, #c2410c) !important; }
-[data-app="editor"], [data-app="notes"] { background: linear-gradient(135deg, #a855f7, #6d28d9) !important; }
-[data-app="calculator"] { background: linear-gradient(135deg, #10b981, #047857) !important; }
-[data-app="calendar"], [data-app="clock"] { background: linear-gradient(135deg, #f59e0b, #b45309) !important; }
-[data-app="tasks"] { background: linear-gradient(135deg, #06b6d4, #0e7490) !important; }
-[data-app="paint"] { background: linear-gradient(135deg, #ec4899, #be185d) !important; }
-[data-app="settings"] { background: linear-gradient(135deg, #64748b, #334155) !important; }
+.launcher-button {
+  background: linear-gradient(135deg, #f43f5e, #be123c) !important;
+}
 
-#taskbar svg, #taskbar img {
+[data-app="files"] {
+  background: linear-gradient(135deg, #0284c7, #0369a1) !important;
+}
+
+[data-app="terminal"] {
+  background: linear-gradient(135deg, #1e293b, #0f172a) !important;
+  border: 1px solid #22c55e !important;
+}
+
+[data-app="browser"] {
+  background: linear-gradient(135deg, #0ea5e9, #2563eb) !important;
+}
+
+[data-app="jupyter"] {
+  background: linear-gradient(135deg, #f97316, #c2410c) !important;
+}
+
+[data-app="editor"],
+[data-app="notes"] {
+  background: linear-gradient(135deg, #a855f7, #6d28d9) !important;
+}
+
+[data-app="calculator"] {
+  background: linear-gradient(135deg, #10b981, #047857) !important;
+}
+
+[data-app="calendar"],
+[data-app="clock"] {
+  background: linear-gradient(135deg, #f59e0b, #b45309) !important;
+}
+
+[data-app="tasks"] {
+  background: linear-gradient(135deg, #06b6d4, #0e7490) !important;
+}
+
+[data-app="paint"] {
+  background: linear-gradient(135deg, #ec4899, #be185d) !important;
+}
+
+[data-app="settings"] {
+  background: linear-gradient(135deg, #64748b, #334155) !important;
+}
+
+#taskbar svg,
+#taskbar img {
   width: 22px !important;
   height: 22px !important;
   stroke: #ffffff !important;
@@ -547,11 +842,16 @@ html[data-theme="dark"] .window {
 }
 
 /* REMOVE SCROLLBARS */
-html, body, #desktop, #taskbar, footer {
+html,
+body,
+#desktop,
+#taskbar,
+footer {
   overflow-x: hidden !important;
   scrollbar-width: none !important;
   -ms-overflow-style: none !important;
 }
+
 *::-webkit-scrollbar {
   display: none !important;
   width: 0 !important;
@@ -559,12 +859,16 @@ html, body, #desktop, #taskbar, footer {
 }
 
 /* HIDE BATTERY & FOCUS SAFELY */
-[data-id*="battery"], .tray-battery, .tile:nth-child(4) {
+[data-id*="battery"],
+.tray-battery,
+.tile:nth-child(4) {
   display: none !important;
 }
 
 /* CONTROL PANEL BOX & GRID */
-div:has(> .tile), .quick-settings, .tray-menu {
+div:has(> .tile),
+.quick-settings,
+.tray-menu {
   width: 320px !important;
   box-sizing: border-box !important;
 }
@@ -581,11 +885,16 @@ div:has(> .tile), .quick-settings, .tray-menu {
   gap: 10px !important;
   box-sizing: border-box !important;
 }
+
 .tile:hover {
   background: rgba(255, 255, 255, 0.14) !important;
   transform: translateY(-2px) !important;
 }
-.tile > div, .tile span, .tile b, .tile p {
+
+.tile>div,
+.tile span,
+.tile b,
+.tile p {
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
@@ -595,14 +904,17 @@ div:has(> .tile), .quick-settings, .tray-menu {
 }
 
 /* MATERIAL SELECTOR */
-.seg, .material-selector {
+.seg,
+.material-selector {
   border-radius: 14px !important;
   background: rgba(0, 0, 0, 0.4) !important;
   padding: 4px !important;
   display: flex !important;
   gap: 4px !important;
 }
-.seg button, .material-selector button {
+
+.seg button,
+.material-selector button {
   flex: 1 !important;
   border-radius: 10px !important;
   border: none !important;
@@ -612,7 +924,9 @@ div:has(> .tile), .quick-settings, .tray-menu {
   font-weight: 500 !important;
   cursor: pointer !important;
 }
-.seg button.active, .material-selector button.active {
+
+.seg button.active,
+.material-selector button.active {
   background: linear-gradient(135deg, #0ea5e9, #0284c7) !important;
   color: #ffffff !important;
   box-shadow: 0 2px 8px rgba(14, 165, 233, 0.5) !important;
@@ -629,7 +943,7 @@ div:has(> .tile), .quick-settings, .tray-menu {
   box-sizing: border-box !important;
 }
 
-.cc-tiles > button {
+.cc-tiles>button {
   min-height: 54px !important;
   padding: 8px 12px !important;
   border-radius: 16px !important;
@@ -643,12 +957,12 @@ div:has(> .tile), .quick-settings, .tray-menu {
   text-align: left !important;
 }
 
-.cc-tiles > button:hover {
+.cc-tiles>button:hover {
   background: rgba(255, 255, 255, 0.14) !important;
   transform: translateY(-2px) !important;
 }
 
-.cc-tiles > button span {
+.cc-tiles>button span {
   display: flex !important;
   flex-direction: column !important;
   min-width: 0 !important;
@@ -656,7 +970,7 @@ div:has(> .tile), .quick-settings, .tray-menu {
   overflow: hidden !important;
 }
 
-.cc-tiles > button b {
+.cc-tiles>button b {
   font-size: 13px !important;
   font-weight: 600 !important;
   color: #f8fafc !important;
@@ -666,7 +980,7 @@ div:has(> .tile), .quick-settings, .tray-menu {
   line-height: 1.2 !important;
 }
 
-.cc-tiles > button small {
+.cc-tiles>button small {
   font-size: 11px !important;
   color: #94a3b8 !important;
   white-space: nowrap !important;
@@ -677,7 +991,8 @@ div:has(> .tile), .quick-settings, .tray-menu {
 }
 
 /* Real Deep Dark Mode (No Brightness Washout) */
-body.light-theme, html[data-theme="light"] {
+body.light-theme,
+html[data-theme="light"] {
   filter: none !important;
 }
 
@@ -686,7 +1001,9 @@ body.light-theme, html[data-theme="light"] {
    =================================================== */
 
 /* Dock container ko flexible aur overflow visible banayein */
-#taskbar, footer#taskbar, .dock {
+#taskbar,
+footer#taskbar,
+.dock {
   overflow: visible !important;
   overflow-x: visible !important;
   overflow-y: visible !important;
@@ -709,7 +1026,9 @@ body::-webkit-scrollbar {
 }
 
 /* Button sizing lock - Box layout resize nahi hoga */
-#taskbar button, .launcher-button, [data-app] {
+#taskbar button,
+.launcher-button,
+[data-app] {
   position: relative !important;
   flex-shrink: 0 !important;
   margin: 0 4px !important;
@@ -719,7 +1038,9 @@ body::-webkit-scrollbar {
 }
 
 /* Smooth stable float hover bina layout hilaye */
-#taskbar button:hover, .launcher-button:hover, [data-app]:hover {
+#taskbar button:hover,
+.launcher-button:hover,
+[data-app]:hover {
   transform: translateY(-6px) translateZ(0) !important;
   transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
 }
@@ -729,7 +1050,8 @@ body::-webkit-scrollbar {
    =================================================== */
 
 /* Real Deep Dark Mode */
-html[data-theme="dark"], body:not(.light-theme) {
+html[data-theme="dark"],
+body:not(.light-theme) {
   --bg-core: #090d16 !important;
   color-scheme: dark !important;
   filter: none !important;
@@ -782,7 +1104,8 @@ body:not(.light-theme) .tray-menu {
    =================================================== */
 
 /* 1. REAL DEEP DARK THEME */
-html[data-theme="dark"], body:not(.light-theme) {
+html[data-theme="dark"],
+body:not(.light-theme) {
   --bg-core: #090d16 !important;
   color-scheme: dark !important;
 }
@@ -792,8 +1115,9 @@ html[data-theme="dark"], body:not(.light-theme) {
 [data-material="classic"] .tray-menu,
 [data-material="classic"] .window,
 [data-material="classic"] div:has(> .cc-tiles) {
-  background: #000000 !important;
-  backdrop-filter: none !important;
+    background: #000000 !important;
+  
+    backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   border: 1px solid rgba(255, 255, 255, 0.12) !important;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7) !important;
@@ -804,8 +1128,9 @@ html[data-theme="dark"], body:not(.light-theme) {
 [data-material="glass"] .tray-menu,
 [data-material="glass"] .window,
 [data-material="glass"] div:has(> .cc-tiles) {
-  background: rgba(5, 5, 5, 0.6) !important;
-  backdrop-filter: blur(28px) saturate(190%) !important;
+    background: rgba(5, 5, 5, 0.6) !important;
+  
+    backdrop-filter: blur(28px) saturate(190%) !important;
   -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
   border: 1px solid rgba(255, 255, 255, 0.2) !important;
   box-shadow: 0 20px 45px -8px rgba(0, 0, 0, 0.75), inset 0 1px 1px rgba(255, 255, 255, 0.25) !important;
@@ -822,8 +1147,9 @@ html[data-theme="dark"], body:not(.light-theme) {
   border: 1px solid rgba(56, 189, 248, 0.4) !important;
   box-shadow: 0 20px 50px rgba(14, 165, 233, 0.3), inset 0 1px 2px rgba(125, 211, 252, 0.4) !important;
 }
+
 /* Strict Battery removal */
-.tray-pill > span:has(svg),
+.tray-pill>span:has(svg),
 .tray-pill span:last-child {
   display: none !important;
 }

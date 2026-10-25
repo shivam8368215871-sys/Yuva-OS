@@ -75,11 +75,10 @@ export function initTray(_taskbar, launch, config) {
     const tiles = el('div'); tiles.className = 'cc-tiles';
     tiles.append(
       tile('📶', 'Network', navigator.onLine ? 'Online' : 'Offline', navigator.onLine, () => {}),
-      tile(s.light ? '☀' : '☾', s.light ? 'Light' : 'Dark', 'Theme', s.light, () => { setSetting('light', !s.light); build(); }),
+      tile(s.light ? '☀' : '☾', 'Focus', s.light ? 'Light' : 'Dark', s.light, () => { setSetting('light', !s.light); document.documentElement.setAttribute('data-theme', !s.light ? 'light' : 'dark'); document.body.classList.toggle('light-theme', !s.light); build(); }),
       tile('⛶', 'Fullscreen', document.fullscreenElement ? 'On' : 'Off', !!document.fullscreenElement, () => {
         if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen?.();
       }),
-      tile('🔕', 'Focus', s.dnd ? 'Silenced' : 'Notifying', s.dnd, () => { setSetting('dnd', !s.dnd); build(); }),
       tile('▦', 'Widgets', s.widgets ? 'Shown' : 'Hidden', s.widgets, () => { setSetting('widgets', !s.widgets); build(); }),
       tile('⚙', 'Settings', 'Open app', false, () => { close(); launch('settings', config); }),
     );

@@ -3,7 +3,7 @@ const session = require('express-session');
 const PgSession = require('connect-pg-simple')(session);
 const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
-const rateLimit = require('express-rate-limit');
+const { rateLimit } = require('express-rate-limit');
 
 const pool = new Pool({
   host: process.env.PGHOST || 'postgres',
@@ -29,49 +29,19 @@ async function initializeAuth() {
       username VARCHAR(32) UNIQUE NOT NULL,
       email VARCHAR(254) UNIQUE NOT NULL,
       password_hash TEXT NOT NULL,
-      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-    );
-  `);
-
-  await pool.query(`
-    ALTER TABLE yuva_users
-    ADD COLUMN IF NOT EXISTS role VARCHAR(16)
-    NOT NULL DEFAULT 'student';
-  `);
-
-  await pool.query(`
-    ALTER TABLE yuva_users
-    ADD COLUMN IF NOT EXISTS full_name VARCHAR(100);
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      CHECK (username = lower(username))
+    )
   `);
 
   await pool.query(`
     CREATE INDEX IF NOT EXISTS yuva_users_created_at_idx
-    ON yuva_users(created_at);
+    ON yuva_users (created_at)
   `);
 
-  await pool.query(`
-    CREATE UNIQUE INDEX IF NOT EXISTS yuva_users_username_lower_idx
-    ON yuva_users(LOWER(username));
-  `);
-
-  await pool.query(`
-    CREATE UNIQUE INDEX IF NOT EXISTS yuva_users_email_lower_idx
-    ON yuva_users(LOWER(email));
-  `);
-
-  await pool.query(`
-    ALTER TABLE yuva_users
-    DROP CONSTRAINT IF EXISTS yuva_users_role_check;
-  `);
-
-  await pool.query(`
-    ALTER TABLE yuva_users
-    ADD CONSTRAINT yuva_users_role_check
-    CHECK (role IN ('student', 'admin'));
-  `);
-
-  console.log('Authentication database initialized.');
+  console.log('Authentication database schema ready');
 }
+
 
 function createSessionMiddleware() {
   const secret = process.env.SESSION_SECRET;
@@ -97,352 +67,173 @@ function createSessionMiddleware() {
   });
 }
 
-function requireAuth(req, res, next) {
-  if (!req.session?.user) {
-    return res.status(401).json({
-      error: 'Authentication required.',
-    });
-  }
-
-  next();
-}
-
-function requireAdmin(req, res, next) {
-  if (!req.session?.user) {
-    return res.status(401).json({
-      error: 'Authentication required.',
-    });
-  }
-
-  if (req.session.user.role !== 'admin') {
-    return res.status(403).json({
-      error: 'Administrator access required.',
-    });
-  }
-
-  next();
-}
-
-function publicUser(user) {
-  return {
-    id: user.id,
-    username: user.username,
-    email: user.email,
-    full_name: user.full_name || '',
-    role: user.role,
-  };
-}
-
-function validateAccount({ username, email, password, fullName }) {
-  if (!/^[a-z0-9_]{3,32}$/.test(username)) {
-    return 'Username must be 3–32 characters and contain only letters, numbers, or underscores.';
-  }
-
-  if (
-    email.length > 254 ||
-    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-  ) {
-    return 'Please enter a valid email address.';
-  }
-
-  if (!fullName || fullName.length < 2 || fullName.length > 100) {
-    return 'Full name must be between 2 and 100 characters.';
-  }
-
-  if (
-    password.length < 12 ||
-    Buffer.byteLength(password, 'utf8') > 72
-  ) {
-    return 'Password must be at least 12 characters and at most 72 bytes.';
-  }
-
-  return null;
-}
-
 function registerAuthRoutes(app) {
-  app.use(express.json({ limit: '20kb' }));
+  app.use(express.json());
 
   const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     limit: 10,
-    standardHeaders: true,
+    standardHeaders: 'draft-8',
     legacyHeaders: false,
-    message: {
-      error: 'Too many login attempts. Please try again later.',
-    },
+    message: { error: 'Too many login attempts. Try again later.' },
   });
 
   const signupLimiter = rateLimit({
     windowMs: 60 * 60 * 1000,
     limit: 5,
-    standardHeaders: true,
+    standardHeaders: 'draft-8',
     legacyHeaders: false,
-    message: {
-      error: 'Too many registration attempts. Please try again later.',
-    },
+    message: { error: 'Too many signup attempts. Try again later.' },
   });
 
   app.get('/api/auth/me', (req, res) => {
-    if (!req.session?.user) {
-      return res.json({ authenticated: false });
-    }
+    const user = req.session?.user;
+    if (!user) return res.json({ authenticated: false });
 
-    return res.json({
+    res.json({
       authenticated: true,
-      user: req.session.user,
+      user: { id: user.id, username: user.username, email: user.email },
     });
   });
 
-  // Public registration: students only.
-  app.post('/api/auth/signup', signupLimiter, async (req, res) => {
+  app.post('/api/auth/signup', signupLimiter, async (req, res, next) => {
     try {
-      const fullName = String(req.body.full_name || '').trim();
-      const username = String(req.body.username || '')
-        .trim()
-        .toLowerCase();
-      const email = String(req.body.email || '')
-        .trim()
-        .toLowerCase();
-      const password = String(req.body.password || '');
-      const confirmPassword = String(req.body.confirm_password || '');
+      const username = String(req.body?.username || '').trim().toLowerCase();
+      const email = String(req.body?.email || '').trim().toLowerCase();
+      const password = req.body?.password;
 
-      if (password !== confirmPassword) {
+      if (!/^[a-z0-9_]{3,32}$/.test(username)) {
         return res.status(400).json({
-          error: 'Passwords do not match.',
+          error: 'Username must be 3–32 characters: lowercase letters, numbers, or underscores.',
         });
       }
 
-      const validationError = validateAccount({
-        fullName,
-        username,
-        email,
-        password,
-      });
+      if (
+        typeof email !== 'string' ||
+        email.length > 254 ||
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+      ) {
+        return res.status(400).json({ error: 'Enter a valid email address.' });
+      }
 
-      if (validationError) {
+      if (
+        typeof password !== 'string' ||
+        password.length < 12 ||
+        Buffer.byteLength(password, 'utf8') > 72
+      ) {
         return res.status(400).json({
-          error: validationError,
+          error: 'Password must be at least 12 characters and no more than 72 bytes.',
         });
       }
 
       const passwordHash = await bcrypt.hash(password, 12);
+      let result;
 
-      const result = await pool.query(
-        `INSERT INTO yuva_users
-          (full_name, username, email, password_hash, role)
-         VALUES ($1, $2, $3, $4, 'student')
-         RETURNING id, full_name, username, email, role`,
-        [fullName, username, email, passwordHash]
-      );
+      try {
+        result = await pool.query(
+          `INSERT INTO yuva_users (username, email, password_hash)
+           VALUES ($1, $2, $3)
+           RETURNING id, username, email`,
+          [username, email, passwordHash]
+        );
+      } catch (error) {
+        if (error.code === '23505') {
+          return res.status(409).json({ error: 'Username or email is already registered.' });
+        }
+        throw error;
+      }
 
-      const user = publicUser(result.rows[0]);
+      const user = result.rows[0];
 
       req.session.regenerate((error) => {
-        if (error) {
-          console.error('Signup session regeneration failed:', error);
-          return res.status(500).json({
-            error: 'Account created, but session could not start.',
-          });
-        }
+        if (error) return next(error);
 
-        req.session.user = user;
+        req.session.user = {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+        };
 
         req.session.save((saveError) => {
-          if (saveError) {
-            console.error('Signup session save failed:', saveError);
-            return res.status(500).json({
-              error: 'Account created, but session could not be saved.',
-            });
-          }
-
-          return res.status(201).json({
+          if (saveError) return next(saveError);
+          res.status(201).json({
             authenticated: true,
-            user,
+            user: req.session.user,
           });
         });
       });
     } catch (error) {
-      if (error.code === '23505') {
-        return res.status(409).json({
-          error: 'Username or email already exists.',
-        });
-      }
-
-      console.error('Student signup error:', error);
-
-      return res.status(500).json({
-        error: 'Unable to create student account.',
-      });
+      next(error);
     }
   });
 
-  // Admin creation: only an authenticated admin can use this endpoint.
-  app.post(
-    '/api/auth/admins',
-    requireAdmin,
-    signupLimiter,
-    async (req, res) => {
-      try {
-        const fullName = String(req.body.full_name || '').trim();
-        const username = String(req.body.username || '')
-          .trim()
-          .toLowerCase();
-        const email = String(req.body.email || '')
-          .trim()
-          .toLowerCase();
-        const password = String(req.body.password || '');
-        const confirmPassword = String(req.body.confirm_password || '');
-
-        if (password !== confirmPassword) {
-          return res.status(400).json({
-            error: 'Passwords do not match.',
-          });
-        }
-
-        const validationError = validateAccount({
-          fullName,
-          username,
-          email,
-          password,
-        });
-
-        if (validationError) {
-          return res.status(400).json({
-            error: validationError,
-          });
-        }
-
-        const passwordHash = await bcrypt.hash(password, 12);
-
-        const result = await pool.query(
-          `INSERT INTO yuva_users
-            (full_name, username, email, password_hash, role)
-           VALUES ($1, $2, $3, $4, 'admin')
-           RETURNING id, full_name, username, email, role`,
-          [fullName, username, email, passwordHash]
-        );
-
-        return res.status(201).json({
-          success: true,
-          user: publicUser(result.rows[0]),
-        });
-      } catch (error) {
-        if (error.code === '23505') {
-          return res.status(409).json({
-            error: 'Username or email already exists.',
-          });
-        }
-
-        console.error('Admin creation error:', error);
-
-        return res.status(500).json({
-          error: 'Unable to create admin account.',
-        });
-      }
-    }
-  );
-
-  app.post('/api/auth/login', loginLimiter, async (req, res) => {
+  app.post('/api/auth/login', loginLimiter, async (req, res, next) => {
     try {
-      const identifier = String(
-        req.body.identifier || req.body.username || ''
-      ).trim().toLowerCase();
-
-      const password = String(req.body.password || '');
+      const identifier = String(req.body?.identifier || '').trim().toLowerCase();
+      const password = req.body?.password;
 
       if (
         !identifier ||
-        !password ||
+        identifier.length > 254 ||
+        typeof password !== 'string' ||
         Buffer.byteLength(password, 'utf8') > 72
       ) {
-        return res.status(400).json({
-          error: 'Enter your username/email and password.',
-        });
+        return res.status(400).json({ error: 'Enter your username/email and password.' });
       }
 
+      const cleanIdentifier = identifier.trim().toLowerCase();
       const result = await pool.query(
-        `SELECT id, full_name, username, email, password_hash, role
+        `SELECT id, username, email, password_hash
          FROM yuva_users
-         WHERE LOWER(username) = $1 OR LOWER(email) = $1
+         WHERE username = $1 OR email = $1
          LIMIT 1`,
         [identifier]
       );
 
-      const record = result.rows[0];
-
-      if (!record) {
-        return res.status(401).json({
-          error: 'Invalid username/email or password.',
-        });
+      if (result.rows.length === 0) {
+        return res.status(401).json({ error: 'Invalid credentials' });
       }
 
-      const passwordMatches = await bcrypt.compare(
+      const user = result.rows[0];
+      const valid = await bcrypt.compare(
         password,
-        record.password_hash
+        user?.password_hash || '$2b$12$invalidinvalidinvalidinvalidinvalidinvalidinvalidinvalid'
       );
 
-      if (!passwordMatches) {
-        return res.status(401).json({
-          error: 'Invalid username/email or password.',
-        });
+      if (!user || !valid) {
+        return res.status(401).json({ error: 'Invalid username/email or password.' });
       }
 
-      const user = publicUser(record);
-
       req.session.regenerate((error) => {
-        if (error) {
-          console.error('Login session regeneration failed:', error);
-          return res.status(500).json({
-            error: 'Unable to start session.',
-          });
-        }
+        if (error) return next(error);
 
-        req.session.user = user;
+        req.session.user = {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+        };
 
         req.session.save((saveError) => {
-          if (saveError) {
-            console.error('Login session save failed:', saveError);
-            return res.status(500).json({
-              error: 'Unable to save session.',
-            });
-          }
-
-          return res.json({
-            authenticated: true,
-            user,
-          });
+          if (saveError) return next(saveError);
+          res.json({ authenticated: true, user: req.session.user });
         });
       });
     } catch (error) {
-      console.error('Login error:', error);
-
-      return res.status(500).json({
-        error: 'Unable to log in.',
-      });
+      next(error);
     }
   });
 
-  app.post('/api/auth/logout', (req, res) => {
-    if (!req.session) {
-      res.clearCookie('yuva.sid');
-      return res.json({ success: true });
-    }
+  app.post('/api/auth/logout', (req, res, next) => {
+    if (!req.session) return res.json({ authenticated: false });
 
     req.session.destroy((error) => {
-      if (error) {
-        console.error('Logout error:', error);
-        return res.status(500).json({
-          error: 'Unable to log out.',
-        });
-      }
-
+      if (error) return next(error);
       res.clearCookie('yuva.sid', {
         httpOnly: true,
         sameSite: 'lax',
         secure: process.env.NODE_ENV === 'production',
       });
-
-      return res.json({ success: true });
+      res.json({ authenticated: false });
     });
   });
 }
@@ -453,6 +244,4 @@ module.exports = {
   createSessionMiddleware,
   registerAuthRoutes,
   sessionStore,
-  requireAuth,
-  requireAdmin,
 };
