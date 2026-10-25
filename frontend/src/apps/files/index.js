@@ -17,6 +17,8 @@ function addStyles() {
       border-radius:inherit; position:relative;
     }
     .yuva-fm * { box-sizing:border-box; }
+    /* Keep hidden folders and controls hidden even when component CSS sets display. */
+    .yuva-fm [hidden] { display: none !important; }
     .yuva-fm button,.yuva-fm input,.yuva-fm select { font:inherit; }
     .yuva-fm button { color:inherit; cursor:pointer; }
     .yuva-fm button:focus-visible,.yuva-fm input:focus-visible,
@@ -55,7 +57,7 @@ function addStyles() {
     .fm-nav-group { display:flex;gap:4px; }
     .fm-btn {
       display:inline-flex;align-items:center;justify-content:center;gap:6px;
-      border:1px solid #33384a;border-radius:8px;padding:7px 10px;
+      border:1px solid #000;border-radius:8px;padding:7px 10px;
       background:#222634;color:#dbe1f3!important;white-space:nowrap;
       transition:background .15s,border-color .15s;
     }
@@ -144,7 +146,7 @@ function addStyles() {
     .fm-status-spacer { flex:1; }
     .fm-context {
       position:absolute;z-index:50;min-width:165px;padding:5px;
-      background:#202432;border:1px solid #3a4156;border-radius:10px;
+      background:#202432;border:1px solid #000;border-radius:10px;
       box-shadow:0 12px 36px #0008;display:flex;flex-direction:column;
     }
     .fm-context button {
@@ -334,13 +336,16 @@ registerApp({
     const sideButtons = {};
     const locations = [
       ['home', '⌂', 'Home'],
-      ['workspace', '▣', 'Workspace']
+      ['workspace', '▣', 'Workspace'],
+      ['group:students', '♧', 'Students'],
+      ['group:admin', '◆', 'Admin']
     ];
 
     for (const [id, icon, label] of locations) {
       const button = el('button', undefined, 'fm-side-btn');
       button.type = 'button';
       button.dataset.location = id;
+      if (id.startsWith('group:')) button.hidden = true;
       button.append(el('span', icon, 'fm-side-icon'), el('span', label, 'fm-side-text'));
       button.onclick = () => {
         if (locationName === id && currentPath === '') return;
@@ -415,6 +420,11 @@ registerApp({
     const newFolderBtn = el('button', '+ Folder', 'fm-btn');
     const newFileBtn = el('button', '+ File', 'fm-btn primary');
 
+    const uploadInput = el('input');
+    uploadInput.type = 'file';
+    uploadInput.hidden = true;
+    uploadInput.multiple = false;
+
     const search = el('input', undefined, 'fm-search');
     search.type = 'search';
     search.placeholder = '⌕  Search this folder';
@@ -471,6 +481,33 @@ registerApp({
     let historyIndex = -1;
     let busy = false;
     const uid = getUid();
+    let groupRole = null;
+
+    function isGroupLocation() {
+      return locationName.startsWith('group:');
+    }
+
+    function groupName() {
+      return isGroupLocation() ? locationName.slice(6) : '';
+    }
+
+    function groupEndpoint() {
+      return `/api/group-folders/${groupName()}`;
+    }
+
+    function updateGroupToolbar() {
+      const group = isGroupLocation();
+      const admin = groupRole === 'admin';
+      newFolderBtn.hidden = group && !admin;
+      newFileBtn.hidden = group && !admin;
+      if (group && admin) {
+        newFileBtn.textContent = '+ Upload';
+        newFileBtn.title = 'Upload a file to this shared folder';
+      } else {
+        newFileBtn.textContent = '+ File';
+        newFileBtn.title = 'Create a new empty file';
+      }
+    }
 
     function setStatus(message, isError = false) {
       statusText.textContent = message;
@@ -509,7 +546,10 @@ registerApp({
     function renderBreadcrumb() {
       crumbs.replaceChildren();
       const parts = currentPath.split('/').filter(Boolean);
-      const rootCrumb = el('button', locationName === 'home' ? '⌂  Home' : '▣  Workspace', 'fm-crumb');
+      const rootLabel = isGroupLocation()
+        ? (groupName() === 'students' ? '♧  Students' : '◆  Admin')
+        : (locationName === 'home' ? '⌂  Home' : '▣  Workspace');
+      const rootCrumb = el('button', rootLabel, 'fm-crumb');
       rootCrumb.type = 'button';
       rootCrumb.onclick = () => navigate('', { remember: true });
       crumbs.appendChild(rootCrumb);
@@ -527,11 +567,23 @@ registerApp({
     }
 
     function renderHeading() {
-      locationTitle.textContent = currentPath.split('/').filter(Boolean).pop()
-        || (locationName === 'home' ? 'Home' : 'Workspace');
+      const group = isGroupLocation();
+      const rootLabel = group
+        ? (groupName() === 'students' ? 'Students' : 'Admin')
+        : (locationName === 'home' ? 'Home' : 'Workspace');
+
+      locationTitle.textContent =
+        currentPath.split('/').filter(Boolean).pop() || rootLabel;
+
       locationSub.textContent = currentPath
-        ? `/${currentPath} · ${locationName === 'home' ? 'Home' : 'Workspace'}`
-        : locationName === 'home' ? 'Your personal home directory' : 'Shared workspace files';
+        ? `/${currentPath} · ${rootLabel}`
+        : group
+          ? (groupRole === 'admin' ? 'Shared group files · Upload enabled' : 'Shared files · Read only')
+          : locationName === 'home'
+            ? 'Your personal home directory'
+            : 'Shared workspace files';
+
+      updateGroupToolbar();
     }
 
     function getVisibleItems() {
@@ -680,17 +732,46 @@ registerApp({
       selectedText.textContent = `${selected.size} selected`;
     }
 
-    function openItem(item) {
+    async function openItem(item) {
       if (item.type === 'folder') {
         selected.clear();
         navigate(pathFor(item.name), { remember: true });
-      } else if (item.type === 'file') {
-        window.dispatchEvent(new CustomEvent('yuva:open-file', {
-          detail: { uid, location: locationName, path: pathFor(item.name) }
-        }));
-      } else {
-        setStatus('This item type cannot be opened yet.', true);
+        return;
       }
+
+      if (item.type !== 'file') {
+        setStatus('This item type cannot be opened yet.', true);
+        return;
+      }
+
+      if (isGroupLocation()) {
+        try {
+          const response = await fetch(
+            `${groupEndpoint()}/${encodeURIComponent(item.id)}/download`
+          );
+          if (!response.ok) {
+            const data = await response.json().catch(() => ({}));
+            throw new Error(data.error || 'Download failed.');
+          }
+          const blob = await response.blob();
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = item.name;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+        } catch (error) {
+          setStatus(error.message, true);
+          window.alert(error.message);
+        }
+        return;
+      }
+
+      window.dispatchEvent(new CustomEvent('yuva:open-file', {
+        detail: { uid, location: locationName, path: pathFor(item.name) }
+      }));
     }
 
     function closeContext() {
@@ -718,10 +799,19 @@ registerApp({
         addAction('✓', `Selected: ${selected.size} items`, () => { });
         context.appendChild(document.createElement('hr'));
       } else {
-        addAction('↗', 'Open', () => openItem(item));
-        context.appendChild(document.createElement('hr'));
-        addAction('✎', 'Rename  ·  F2', () => renameItem(item));
-        addAction('⌫', 'Delete', () => deleteItem(item), true);
+        addAction(
+          isGroupLocation() && item.type === 'file' ? '↓' : '↗',
+          isGroupLocation() && item.type === 'file' ? 'Download' : 'Open',
+          () => openItem(item)
+        );
+
+        // Shared group folders are managed through their role-specific
+        // permissions. Never offer personal-file rename/delete actions here.
+        if (!isGroupLocation()) {
+          context.appendChild(document.createElement('hr'));
+          addAction('✎', 'Rename  ·  F2', () => renameItem(item));
+          addAction('⌫', 'Delete', () => deleteItem(item), true);
+        }
       }
 
       context.style.left = '0px';
@@ -816,7 +906,11 @@ registerApp({
       const params = new URLSearchParams({ uid, location: locationName, path: currentPath });
 
       try {
-        const response = await fetch(`/api/files?${params}`);
+        const url = isGroupLocation()
+          ? `${groupEndpoint()}?path=${encodeURIComponent(currentPath)}`
+          : `/api/files?${params}`;
+
+        const response = await fetch(url);
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || 'Unable to list files.');
         if (disposed || thisRequest !== requestNumber) return;
@@ -842,12 +936,43 @@ registerApp({
       navigate(parts.join('/'), { remember: true });
     }
 
-    function createItem(operation) {
+    async function createItem(operation) {
       const isFolder = operation === 'mkdir';
+      const group = isGroupLocation();
       const name = window.prompt(isFolder ? 'New folder name:' : 'New empty file name:');
       if (name === null) return;
       if (!name.trim()) return window.alert('Name cannot be empty.');
       if (name.includes('/') || name.includes('\\')) return window.alert('Enter a name, not a path.');
+
+      if (group) {
+        if (groupRole !== 'admin') {
+          window.alert('This shared folder is read-only for your account.');
+          return;
+        }
+        if (!isFolder) {
+          window.alert('Use the Upload button to add a file.');
+          return;
+        }
+
+        setBusy(true);
+        try {
+          const response = await fetch(`${groupEndpoint()}/folder`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: name.trim(), path: currentPath })
+          });
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.error || 'Could not create folder.');
+          await navigate(currentPath, { remember: false });
+        } catch (error) {
+          setStatus(error.message, true);
+          window.alert(error.message);
+        } finally {
+          setBusy(false);
+        }
+        return;
+      }
+
       runAction(operation, name.trim());
     }
 
@@ -861,7 +986,44 @@ registerApp({
     upBtn.onclick = goUp;
     refreshBtn.onclick = () => navigate(currentPath, { remember: false });
     newFolderBtn.onclick = () => createItem('mkdir');
-    newFileBtn.onclick = () => createItem('create-file');
+    newFileBtn.onclick = () => {
+      if (!isGroupLocation()) {
+        createItem('create-file');
+        return;
+      }
+      if (groupRole !== 'admin') return;
+      uploadInput.click();
+    };
+
+    uploadInput.addEventListener('change', async () => {
+      const file = uploadInput.files?.[0];
+      uploadInput.value = '';
+      if (!file || !isGroupLocation() || groupRole !== 'admin') return;
+
+      setBusy(true);
+      setStatus('Uploading…');
+      try {
+        const query = new URLSearchParams({
+          name: file.name,
+          path: currentPath
+        });
+        const response = await fetch(`${groupEndpoint()}/upload?${query}`, {
+          method: 'POST',
+          headers: { 'Content-Type': file.type || 'application/octet-stream' },
+          body: file
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Upload failed.');
+        await navigate(currentPath, { remember: false });
+      } catch (error) {
+        setStatus(error.message, true);
+        window.alert(error.message);
+      } finally {
+        setBusy(false);
+      }
+    });
+
+    toolbar.appendChild(uploadInput);
 
     search.addEventListener('input', () => {
       selected.clear();
@@ -928,6 +1090,27 @@ registerApp({
     root.addEventListener('keydown', onKeyDown);
 
     navigate('');
+
+    fetch('/api/group-folders/me')
+      .then(async response => {
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Could not load role.');
+        groupRole = data.role;
+
+        if (sideButtons['group:students']) {
+          sideButtons['group:students'].hidden =
+            groupRole !== 'admin' || !data.locations.includes('students');
+        }
+        if (sideButtons['group:admin']) {
+          sideButtons['group:admin'].hidden =
+            groupRole !== 'student' || !data.locations.includes('admin');
+        }
+
+        updateGroupToolbar();
+      })
+      .catch(error => {
+        setStatus(`Group folders unavailable: ${error.message}`, true);
+      });
 
     this._cleanup = () => {
       disposed = true;

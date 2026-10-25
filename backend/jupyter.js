@@ -39,18 +39,13 @@ function sendHttpError(socket, status, message) {
 }
 
 async function getJupyter(uid, docker) {
-  const isLocal = uid === 'local-desktop';
-  if (!isLocal && !/^[0-9a-f-]{36}$/i.test(uid)) {
+  if (!/^[0-9a-f-]{36}$/i.test(uid)) {
     throw new Error('Invalid authenticated user ID');
   }
 
-  const name = isLocal ? 'yuva-jupyter-local' : `yuva-jupyter-${uid}`;
-  const homeVolume = isLocal
-    ? 'yuva-home-db789f4e-a926-412c-9ad9-c1ade9199980'
-    : `yuva-home-${uid}`;
-  const workspaceVolume = isLocal
-    ? 'yuva-workspace'
-    : `yuva-workspace-${uid}`;
+  const name = `yuva-jupyter-${uid}`;
+  const homeVolume = `yuva-home-${uid}`;
+  const workspaceVolume = `yuva-workspace-${uid}`;
   let container = docker.getContainer(name);
   let info;
 

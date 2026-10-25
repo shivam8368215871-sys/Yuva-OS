@@ -7,6 +7,7 @@ import { showMenu } from './core/contextMenu.js';
 import { applySettings, getSettings, setSetting, WALLPAPERS } from './core/settings.js';
 import { initTray } from './core/tray.js';
 import { initWidgets } from './core/widgets.js';
+import { initAuthGate } from './auth.js';
 
 import './apps/jupyter/index.js';
 import './apps/browser/index.js';
@@ -20,11 +21,13 @@ import './apps/tasks/index.js';
 import './apps/clock/index.js';
 import './apps/paint/index.js';
 import './apps/settings/index.js';
-
-const config = await (await fetch('/config')).json();
+import './apps/companion/index.js';
 
 const taskbar = document.getElementById('taskbar');
 const desktop = document.getElementById('desktop');
+await initAuthGate({ desktop, taskbar });
+
+const config = await (await fetch('/config')).json();
 
 const launcherButton = document.createElement('button');
 launcherButton.className = 'launcher-button';

@@ -1,10 +1,15 @@
 const express = require('express');
+const { registerCompanionRoutes } = require('./companion');
 const http = require('http');
 const path = require('path');
 const { StringDecoder } = require('string_decoder');
 const { WebSocketServer } = require('ws');
 const Docker = require('dockerode');
 const { registerFileRoutes } = require('./fileManager');
+const {
+  initializeSharedFiles,
+  registerSharedFileRoutes,
+} = require('./sharedFiles');
 const {
   initializeAuth,
   createSessionMiddleware,
@@ -20,15 +25,6 @@ const {
 } = require('./jupyter');
 
 const IDLE_MS = 60 * 1000;
-const LOCAL_DESKTOP_UID = 'local-desktop';
-const LOCAL_HOME_VOLUME = 'yuva-home-db789f4e-a926-412c-9ad9-c1ade9199980';
-const LOCAL_WORKSPACE_VOLUME = 'yuva-workspace';
-
-function isLocalDesktopRequest(req) {
-  if (process.env.YUVA_LOCAL_DESKTOP !== 'true') return false;
-  const host = String(req.headers.host || '').toLowerCase();
-  return /^(localhost|127\.0\.0\.1)(:\d+)?$/.test(host);
-}
 const MARK = '\x1b]777;yuva;';
 // After every command, bash prints a hidden marker: exit code, last command, directory.
 const PROMPT_CMD = String.raw`__y=$?; printf '\033]777;yuva;%s;%s;%s\007' "$__y" "$(history 1 | base64 -w0)" "$(printf %s "$PWD" | base64 -w0)"`;
@@ -122,26 +118,20 @@ ${out.slice(-1500)}`;
 
 const docker = new Docker({ socketPath: '/var/run/docker.sock' });
 const app = express();
+app.use(express.json({ limit: '10mb' }));
 
 // Share one session middleware between HTTP routes and WebSocket upgrades.
 const sessionMiddleware = createSessionMiddleware();
 app.use(sessionMiddleware);
 registerAuthRoutes(app);
-
-// Keep authentication available for later reattachment. The desktop bypass
-// applies only to requests addressed to loopback.
-app.use((req, res, next) => {
-  if (isLocalDesktopRequest(req)) {
-    req.session.user = { id: LOCAL_DESKTOP_UID };
-  }
-  next();
-});
+registerCompanionRoutes(app);
 
 registerJupyterRoutes(app, docker);
 
 app.use(express.static(path.join(__dirname, '../frontend')));
 app.get('/config', (req, res) => res.json({ jupyterBasePath: '/api/jupyter/' }));
 registerFileRoutes(app, getContainer);
+registerSharedFileRoutes(app);
 
 const server = http.createServer(app);
 const wss = new WebSocketServer({ noServer: true });
@@ -166,22 +156,6 @@ server.on('upgrade', (req, socket, head) => {
       'Content-Length: 0\r\n\r\n'
     );
   };
-
-  if (isLocalDesktopRequest(req)) {
-    req.session = { user: { id: LOCAL_DESKTOP_UID } };
-    if (isJupyterUpgrade) {
-      handleJupyterUpgrade(req, socket, head, LOCAL_DESKTOP_UID, docker)
-        .catch((error) => {
-          console.error('Local Jupyter upgrade failed:', error.message);
-          if (!socket.destroyed) socket.destroy();
-        });
-    } else {
-      wss.handleUpgrade(req, socket, head, (ws) => {
-        wss.emit('connection', ws, req);
-      });
-    }
-    return;
-  }
 
   try {
     const cookies = cookie.parse(req.headers.cookie || '');
@@ -237,60 +211,129 @@ server.on('upgrade', (req, socket, head) => {
 });
 
 async function getContainer(uid) {
-  const isLocal = uid === LOCAL_DESKTOP_UID;
-  const name = isLocal ? 'yuva-local-desktop' : `yuva-${uid}`;
-  const homeVolume = isLocal ? LOCAL_HOME_VOLUME : `yuva-home-${uid}`;
-  const workspaceVolume = isLocal
-    ? LOCAL_WORKSPACE_VOLUME
-    : `yuva-workspace-${uid}`;
-  const c = docker.getContainer(name);
-  try {
-    const info = await c.inspect();
-    if (info.State.Paused) await c.unpause();
-    else if (!info.State.Running) await c.start();
-    return c;
-  } catch (e) { if (e.statusCode !== 404) throw e; }
-  
-const nc = await docker.createContainer({
-  name,
-  Image: 'yuva-ubuntu',
-  Cmd: ['sleep', 'infinity'],
-  User: 'ubuntu',
-  WorkingDir: '/home/ubuntu',
-  HostConfig: {
-    Binds: [
-      `${homeVolume}:/home/ubuntu`,
-      `${workspaceVolume}:/workspace`,
-    ],
-    Memory: 512 * 1024 * 1024,
-    NanoCpus: 1e9,
-    PidsLimit: 256,
-  },
-});
-
-  await nc.start();
-
-  // Initialize standard home folders without overwriting user data.
-  const init = await nc.exec({
-    Cmd: [
-      'sh', '-lc',
-      'mkdir -p /home/ubuntu/Documents /home/ubuntu/Downloads /home/ubuntu/Desktop /home/ubuntu/Pictures /home/ubuntu/Videos /home/ubuntu/Music && chown ubuntu:ubuntu /home/ubuntu/Documents /home/ubuntu/Downloads /home/ubuntu/Desktop /home/ubuntu/Pictures /home/ubuntu/Videos /home/ubuntu/Music'
-    ],
-    AttachStdout: true,
-    AttachStderr: true,
-    User: 'root',
-  });
-  const initStream = await init.start({ hijack: true, stdin: false });
-  await new Promise((resolve, reject) => {
-    initStream.on('end', resolve);
-    initStream.on('error', reject);
-  });
-  const initInfo = await init.inspect();
-  if (initInfo.ExitCode !== 0) {
-    throw new Error('Could not initialize standard home folders');
+  if (!/^[0-9a-f-]{36}$/i.test(uid)) {
+    throw new Error('Invalid authenticated user ID');
   }
 
-  return nc;
+  const name = `yuva-${uid}`;
+  const homeVolume = `yuva-home-${uid}`;
+  const workspaceVolume = `yuva-workspace-${uid}`;
+
+  const expectedMounts = new Map([
+    [homeVolume, '/home/ubuntu'],
+    [workspaceVolume, '/workspace'],
+  ]);
+
+  const container = docker.getContainer(name);
+
+  try {
+    const info = await container.inspect();
+
+    // Fail closed: never use a container with unexpected mounts.
+    const mounts = info.Mounts || [];
+
+    const validMounts =
+      mounts.length === expectedMounts.size &&
+      mounts.every((mount) =>
+        mount.Type === 'volume' &&
+        expectedMounts.get(mount.Name) === mount.Destination
+      );
+
+    if (!validMounts) {
+      throw new Error(
+        `Filesystem isolation check failed for ${name}. ` +
+        'Container mounts do not match this student. ' +
+        'Container was not changed.'
+      );
+    }
+
+    if (info.Config?.Image !== 'yuva-ubuntu') {
+      throw new Error(
+        `Unexpected image for ${name}. Container was not changed.`
+      );
+    }
+
+    if (info.Config?.User !== 'ubuntu') {
+      throw new Error(
+        `Unexpected container user for ${name}. Container was not changed.`
+      );
+    }
+
+    if (info.State.Paused) {
+      await container.unpause();
+    } else if (!info.State.Running) {
+      await container.start();
+    }
+
+    return container;
+
+  } catch (error) {
+    if (error.statusCode !== 404) {
+      throw error;
+    }
+  }
+
+  // Create only the authenticated student's own container.
+  const newContainer = await docker.createContainer({
+    name,
+    Image: 'yuva-ubuntu',
+    Cmd: ['sleep', 'infinity'],
+    User: 'ubuntu',
+    WorkingDir: '/home/ubuntu',
+
+    Labels: {
+      'yuva.managed': 'true',
+      'yuva.user-id': uid,
+    },
+
+    HostConfig: {
+      Binds: [
+        `${homeVolume}:/home/ubuntu`,
+        `${workspaceVolume}:/workspace`,
+      ],
+      Memory: 512 * 1024 * 1024,
+      NanoCpus: 1e9,
+      PidsLimit: 256,
+    },
+  });
+
+  await newContainer.start();
+
+  // Initialize standard directories without touching existing volumes.
+  const init = await newContainer.exec({
+    Cmd: [
+      '/bin/bash',
+      '-lc',
+      'mkdir -p /home/ubuntu /workspace && ' +
+      'chown -R ubuntu:ubuntu /home/ubuntu /workspace'
+    ],
+    User: 'root',
+    AttachStdout: true,
+    AttachStderr: true,
+  });
+
+  const stream = await init.start({ hijack: false, stdin: false });
+
+  await new Promise((resolve, reject) => {
+    newContainer.modem.demuxStream(
+      stream,
+      process.stdout,
+      process.stderr
+    );
+
+    stream.on('end', resolve);
+    stream.on('error', reject);
+  });
+
+  const initResult = await init.inspect();
+
+  if (initResult.ExitCode !== 0) {
+    throw new Error(
+      `Filesystem initialization failed for ${name}`
+    );
+  }
+
+  return newContainer;
 }
 
 wss.on('connection', async (ws, req) => {
@@ -398,6 +441,7 @@ wss.on('connection', async (ws, req) => {
 });
 
 initializeAuth()
+  .then(() => initializeSharedFiles())
   .then(() => {
     server.listen(process.env.PORT || 8080, () => {
       console.log('YuVA running');

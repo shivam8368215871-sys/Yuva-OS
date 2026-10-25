@@ -13,6 +13,7 @@ const iconFiles = {
   paint: 'palette.svg',
   browser: 'globe.svg',
   mentor: 'sparkles.svg',
+  companion: 'sparkles.svg',
 };
 
 export const ICONS = Object.fromEntries(

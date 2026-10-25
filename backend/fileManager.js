@@ -1,7 +1,7 @@
 const path = require('path');
 const express = require('express');
 
-const UID_RE = /^(?:[a-f0-9-]{8,36}|local-desktop)$/;
+const UID_RE = /^[a-f0-9-]{36}$/i;
 
 const PYTHON_LIST = String.raw`
 import os, sys, json

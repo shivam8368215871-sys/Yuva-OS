@@ -587,7 +587,7 @@ button:focus-visible,input:focus-visible{outline-color:#78dba9}
 }
 
 .dock-app.active .dock-indicator {
-  box-shadow: 0 0 8px rgba(120, 219, 169, .28);
+  box-shadow: 0 0 8px rgba(7, 211, 109, 0.28);
 }
 
 /* A subtle entrance for the launcher without changing its open/close logic. */

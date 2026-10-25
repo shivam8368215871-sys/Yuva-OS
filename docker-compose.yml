@@ -11,13 +11,13 @@ services:
       PGDATABASE: yuva
       PGUSER: yuva
       PGPASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
-      YUVA_LOCAL_DESKTOP: "true"
     depends_on:
       postgres:
         condition: service_healthy
     volumes:
       - ./frontend:/app/frontend:ro
       - /var/run/docker.sock:/var/run/docker.sock
+      - yuva-shared-files:/app/shared-files
 
   postgres:
     image: postgres:16-alpine
@@ -36,6 +36,7 @@ services:
 
 volumes:
   yuva-postgres-data:
+  yuva-shared-files:
   yuva-workspace:
     external: true
   yuva-user-home:
